@@ -1,8 +1,11 @@
 package logger
 
 import (
-	"path"
+	"fmt"
+	"os"
+	"path/filepath"
 
+	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -13,49 +16,97 @@ type Logger struct {
 }
 
 type LoggerConfig struct {
-	Dir []string
+	Path              []string
+	LogFileMaxSizeMB  int
+	LogFileMaxBackups int
+	LogMaxAgeDays     int
+	LogCompress       bool
+	LogLevel          string
+}
+
+func (l *LoggerConfig) check() {
+	if l.LogFileMaxSizeMB <= 0 {
+		l.LogFileMaxSizeMB = 128
+	}
+	if l.LogFileMaxBackups <= 0 {
+		l.LogFileMaxBackups = 10
+	}
+	if l.LogMaxAgeDays <= 0 {
+		l.LogMaxAgeDays = 30
+	}
+	if l.LogLevel == "" {
+		l.LogLevel = "debug"
+	}
 }
 
 func NewLogger(c *LoggerConfig) (*Logger, error) {
 
 	if c == nil {
 		c = &LoggerConfig{
-			Dir: []string{"..", "log", "undefine.log"},
+			Path: []string{"..", "log", "undefine.log"},
 		}
 	}
+	c.check()
 
-	logLevel := zap.NewAtomicLevelAt(zapcore.DebugLevel)
-
-	var zc = zap.Config{
-		Level:             logLevel,
-		Development:       false,
-		DisableCaller:     false,
-		DisableStacktrace: false,
-		Sampling:          nil,
-		Encoding:          "json",
-		EncoderConfig: zapcore.EncoderConfig{
-			MessageKey:     "message",
-			LevelKey:       "level",
-			TimeKey:        "time",
-			NameKey:        "name",
-			CallerKey:      "caller",
-			StacktraceKey:  "stacktrace",
-			LineEnding:     zapcore.DefaultLineEnding,
-			EncodeLevel:    zapcore.LowercaseLevelEncoder,
-			EncodeTime:     zapcore.ISO8601TimeEncoder,
-			EncodeDuration: zapcore.StringDurationEncoder,
-			EncodeCaller:   zapcore.ShortCallerEncoder,
-			EncodeName:     zapcore.FullNameEncoder,
-		},
-		OutputPaths:      []string{path.Join(c.Dir...)},
-		ErrorOutputPaths: []string{path.Join(c.Dir...)},
-	}
-
-	logger, err := zc.Build()
-	if err != nil {
+	lc := &Logger{c: c}
+	if err := lc.checkOutputPath(); err != nil {
 		return nil, err
 	}
-	return &Logger{lg: logger, c: c}, nil
+
+	lvs := map[string]zapcore.Level{
+		"debug": zapcore.DebugLevel,
+		"info":  zapcore.InfoLevel,
+		"warn":  zapcore.WarnLevel,
+		"error": zapcore.ErrorLevel,
+	}
+	cLv, ok := lvs[c.LogLevel]
+	if !ok {
+		cLv = lvs["info"]
+	}
+
+	ec := zapcore.EncoderConfig{
+		MessageKey:     "message",
+		LevelKey:       "level",
+		TimeKey:        "time",
+		NameKey:        "name",
+		CallerKey:      "caller",
+		StacktraceKey:  "stacktrace",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
+		EncodeDuration: zapcore.StringDurationEncoder,
+		EncodeCaller:   zapcore.ShortCallerEncoder,
+		EncodeName:     zapcore.FullNameEncoder,
+	}
+	encoder := zapcore.NewJSONEncoder(ec)
+
+	lj := zapcore.AddSync(&lumberjack.Logger{
+		Filename:   filepath.Join(c.Path...),
+		MaxSize:    c.LogFileMaxSizeMB,
+		MaxBackups: c.LogFileMaxBackups,
+		MaxAge:     c.LogMaxAgeDays,
+		Compress:   c.LogCompress,
+	})
+
+	lc.lg = zap.New(zapcore.NewCore(encoder, lj, cLv), zap.AddCaller())
+	return lc, nil
+}
+
+func (l *Logger) checkOutputPath() error {
+	if len(l.c.Path) < 1 {
+		return fmt.Errorf("invalid logger output path: %+v", l.c.Path)
+	}
+	p := filepath.Join(l.c.Path[0 : len(l.c.Path)-1]...)
+	_, err := os.Stat(p)
+	switch err {
+	case nil:
+		return nil
+	default:
+		if os.IsExist(err) {
+			return nil
+		}
+		return os.Mkdir(p, os.ModePerm)
+	}
 }
 
 func (l *Logger) Sync() {

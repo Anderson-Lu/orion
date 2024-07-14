@@ -15,9 +15,9 @@ func main() {
 	c := &xgrpc.Config{
 		GRPC:          &xgrpc.GRPCConfig{Enable: true, Port: 8081},
 		HTTP:          &xgrpc.HTTPConfig{Enable: true, Port: 8080},
-		FrameLogger:   &logger.LoggerConfig{Dir: []string{"..", "log", "frame.log"}},
-		AccessLogger:  &logger.LoggerConfig{Dir: []string{"..", "log", "access.log"}},
-		ServiceLogger: &logger.LoggerConfig{Dir: []string{"..", "log", "service.log"}},
+		FrameLogger:   &logger.LoggerConfig{Path: []string{"..", "log_1", "frame.log"}},
+		AccessLogger:  &logger.LoggerConfig{Path: []string{"..", "log", "access.log"}},
+		ServiceLogger: &logger.LoggerConfig{Path: []string{"..", "log", "service.log"}},
 	}
 
 	server, err := xgrpc.New(c)
