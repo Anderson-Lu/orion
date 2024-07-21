@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
+	go.uber.org/automaxprocs v1.5.3
 	go.uber.org/zap v1.27.0
 	golang.org/x/sync v0.3.0
 	google.golang.org/grpc v1.56.0

@@ -13,6 +13,10 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	_ "runtime/pprof"
+
+	_ "go.uber.org/automaxprocs"
 )
 
 type Server struct {
