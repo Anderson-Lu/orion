@@ -88,7 +88,7 @@ func NewLogger(c *LoggerConfig) (*Logger, error) {
 		Compress:   c.LogCompress,
 	})
 
-	lc.lg = zap.New(zapcore.NewCore(encoder, lj, cLv), zap.AddCaller())
+	lc.lg = zap.New(zapcore.NewCore(encoder, lj, cLv), zap.AddCaller(), zap.AddCallerSkip(1))
 	return lc, nil
 }
 

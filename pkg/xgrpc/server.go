@@ -7,6 +7,8 @@ import (
 	"net/http"
 
 	"github.com/uit/pkg/logger"
+	"github.com/uit/pkg/xgrpc/interceptors"
+	"github.com/uit/pkg/xgrpc/options"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/uit/pkg/event"
@@ -27,12 +29,12 @@ type Server struct {
 	e    *event.EventHub
 	lfra *logger.Logger
 	lacc *logger.Logger
-	lsvc *logger.Logger
 }
 
-func New(c *Config) (*Server, error) {
+func New(c *Config, opts ...options.ServerOption) (*Server, error) {
 
 	s := &Server{c: c}
+
 	if err := s.initLogger(); err != nil {
 		return nil, err
 	}
@@ -43,14 +45,14 @@ func New(c *Config) (*Server, error) {
 		event.WithConsumer(uint32(EventTypeLog), s.evLogger),
 	)
 	s.e = ev
-	s.g = grpc.NewServer(grpc.UnaryInterceptor(AccessLoggerInterceptor(s.lacc)))
-
+	s.g = grpc.NewServer(grpc.UnaryInterceptor(interceptors.AccessInterceptor(s.lacc)))
 	reflection.Register(s.g)
-	return s, nil
-}
 
-func (s *Server) SvcLogger() *logger.Logger {
-	return s.lsvc
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	return s, nil
 }
 
 func (s *Server) initLogger() error {
@@ -66,12 +68,6 @@ func (s *Server) initLogger() error {
 		return err
 	}
 	s.lacc = sl
-
-	sv, err := logger.NewLogger(s.c.ServiceLogger)
-	if err != nil {
-		return err
-	}
-	s.lsvc = sv
 
 	return nil
 }
@@ -116,33 +112,37 @@ func (s *Server) Stop() {
 
 func (s *Server) serveHTTPServer() error {
 	s.m = runtime.NewServeMux()
-	fmt.Printf("[Server] http prepare on: %d \n", s.c.HTTP.Port)
+	s.lfra.Info("[Server] http server started succ", "port", s.c.HTTP.Port)
 	s.e.Publish(&Event{typ: EventTypeLog, data: fmt.Sprintf("[Server] http server stared on: %d", s.c.HTTP.Port)})
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", s.c.HTTP.Port), s.m); err != nil {
-		fmt.Printf("[Server] http started fail, port: %d, err:%+v \n", s.c.HTTP.Port, err.Error())
+		s.lfra.Info("[Server] http server started fail", "port", s.c.HTTP.Port, "err", err.Error())
 		return err
 	}
 	return nil
 }
 
 func (s *Server) serveGRPCServer() error {
-
-	fmt.Printf("[Server] gRPC prepare on: %d \n", s.c.GRPC.Port)
+	s.lfra.Info("[Server] gRPC server started succ", "port", s.c.GRPC.Port)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.c.GRPC.Port))
 	if err != nil {
-		fmt.Printf("[Server] gRPC started fail, port: %d, err:%+v \n", s.c.GRPC.Port, err.Error())
+		s.lfra.Info("[Server] gRPC server started fail", "port", s.c.GRPC.Port, "err", err.Error())
 		return err
 	}
 	s.e.Publish(&Event{typ: EventTypeLog, data: fmt.Sprintf("[Server] gRPC server stared on: %d", s.c.GRPC.Port)})
 	err = s.g.Serve(lis)
 	if err != nil {
-		fmt.Printf("[Server] gRPC started fail, port: %d, err:%+v \n", s.c.GRPC.Port, err.Error())
+		s.lfra.Info("[Server] gRPC server started fail", "port", s.c.GRPC.Port, "err", err.Error())
 		return err
 	}
 	return nil
 }
 
 func (s *Server) evLogger(msg event.Event) error {
-	s.lfra.Info("[Server]", "EvType", msg.Type(), "Ev", msg.Data())
+	s.lfra.Debug("[Server]", "EvType", msg.Type(), "Ev", msg.Data())
 	return nil
+}
+
+func (s *Server) Register(sd *grpc.ServiceDesc, handler interface{}) {
+	s.g.RegisterService(sd, handler)
+	s.lfra.Info("[Server] gRPC router registed", "desc", sd.ServiceName)
 }

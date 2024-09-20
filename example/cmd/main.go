@@ -3,11 +3,13 @@ package main
 import (
 	"log"
 
-	"github.com/uit/example/service"
 	"github.com/uit/pkg/logger"
 	"github.com/uit/pkg/xgrpc"
+	_ "github.com/uit/pkg/xgrpc/build"
+	"github.com/uit/pkg/xgrpc/options"
 
 	"github.com/uit/example/proto_go/todo"
+	"github.com/uit/example/service"
 )
 
 func main() {
@@ -15,19 +17,16 @@ func main() {
 	c := &xgrpc.Config{
 		GRPC:          &xgrpc.GRPCConfig{Enable: true, Port: 8081},
 		HTTP:          &xgrpc.HTTPConfig{Enable: true, Port: 8080},
-		FrameLogger:   &logger.LoggerConfig{Path: []string{"..", "log_1", "frame.log"}},
+		FrameLogger:   &logger.LoggerConfig{Path: []string{"..", "log", "frame.log"}, LogLevel: "info"},
 		AccessLogger:  &logger.LoggerConfig{Path: []string{"..", "log", "access.log"}},
 		ServiceLogger: &logger.LoggerConfig{Path: []string{"..", "log", "service.log"}},
 	}
 
-	server, err := xgrpc.New(c)
+	handler, _ := service.NewService(c)
+	server, err := xgrpc.New(c, options.WithHandler(handler, &todo.UitTodo_ServiceDesc))
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	srv := service.NewService(c, server.SvcLogger())
-
-	todo.RegisterUitTodoServer(server.GRPCServer(), srv)
 
 	if err := server.Serve(); err != nil {
 		log.Fatal(err)

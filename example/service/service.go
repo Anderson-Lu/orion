@@ -6,11 +6,17 @@ import (
 	"github.com/uit/pkg/xgrpc"
 )
 
-func NewService(c *xgrpc.Config, lgsvc *logger.Logger) *Service {
+func NewService(c *xgrpc.Config) (*Service, error) {
+
+	lg, err := logger.NewLogger(c.ServiceLogger)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Service{
 		c: c,
-		l: lgsvc,
-	}
+		l: lg,
+	}, nil
 }
 
 type Service struct {
