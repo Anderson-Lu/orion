@@ -61,4 +61,15 @@ build-version:
 	./build/"$(app_name)" -v
 ```
 
+打印构建信息:
+
+```shell
+[root@VM /data/uit/example]# ./build/example -v
+Git Branch     : dev_0_0_2_cbb23d5 
+Git Commit     : cbb23d5 
+Built Time     : 2024-09-23T12:21:35Z 
+Go Version     : go version go1.22.1 linux/amd64 
+XGRPC Version  : dev0.0.2 
+```
+
 ## 版本记录

@@ -23,12 +23,15 @@ func main() {
 	}
 
 	handler, _ := service.NewService(c)
-	server, err := xgrpc.New(c, options.WithHandler(handler, &todo.UitTodo_ServiceDesc))
+	server, err := xgrpc.New(c,
+		options.WithHandler(handler, &todo.UitTodo_ServiceDesc),
+		options.WithFlags(),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := server.Serve(); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -2,11 +2,13 @@ package xgrpc
 
 import (
 	"fmt"
+	"os"
 
 	"net"
 	"net/http"
 
 	"github.com/uit/pkg/logger"
+	"github.com/uit/pkg/xgrpc/build"
 	"github.com/uit/pkg/xgrpc/interceptors"
 	"github.com/uit/pkg/xgrpc/options"
 
@@ -29,6 +31,8 @@ type Server struct {
 	e    *event.EventHub
 	lfra *logger.Logger
 	lacc *logger.Logger
+
+	withFlags bool
 }
 
 func New(c *Config, opts ...options.ServerOption) (*Server, error) {
@@ -53,6 +57,10 @@ func New(c *Config, opts ...options.ServerOption) (*Server, error) {
 	}
 
 	return s, nil
+}
+
+func (s *Server) RegisterFlagsHandler() {
+	s.withFlags = true
 }
 
 func (s *Server) initLogger() error {
@@ -80,7 +88,24 @@ func (s *Server) MuxServer() *runtime.ServeMux {
 	return s.m
 }
 
-func (s *Server) Serve() error {
+func (s *Server) serveFlags() bool {
+	for _, args := range os.Args {
+		switch args {
+		case "-v", "--verbose":
+			build.PrintVerbose()
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Server) ListenAndServe() error {
+
+	if s.withFlags {
+		if ok := s.serveFlags(); ok {
+			return nil
+		}
+	}
 
 	defer s.lfra.Sync()
 	if s.lacc != nil {
@@ -142,7 +167,7 @@ func (s *Server) evLogger(msg event.Event) error {
 	return nil
 }
 
-func (s *Server) Register(sd *grpc.ServiceDesc, handler interface{}) {
+func (s *Server) RegisterGRPCHandler(sd *grpc.ServiceDesc, handler interface{}) {
 	s.g.RegisterService(sd, handler)
 	s.lfra.Info("[Server] gRPC router registed", "desc", sd.ServiceName)
 }
