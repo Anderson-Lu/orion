@@ -20,6 +20,7 @@ func main() {
 		FrameLogger:   &logger.LoggerConfig{Path: []string{"..", "log", "frame.log"}, LogLevel: "info"},
 		AccessLogger:  &logger.LoggerConfig{Path: []string{"..", "log", "access.log"}},
 		ServiceLogger: &logger.LoggerConfig{Path: []string{"..", "log", "service.log"}},
+		PanicLogger:   &logger.LoggerConfig{Path: []string{"..", "log", "panic.log"}},
 	}
 
 	handler, _ := service.NewService(c)

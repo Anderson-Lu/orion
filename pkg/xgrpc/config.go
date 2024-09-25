@@ -24,4 +24,5 @@ type Config struct {
 	FrameLogger   *logger.LoggerConfig
 	AccessLogger  *logger.LoggerConfig
 	ServiceLogger *logger.LoggerConfig
+	PanicLogger   *logger.LoggerConfig
 }

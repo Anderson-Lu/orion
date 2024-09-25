@@ -23,14 +23,21 @@ import (
 	_ "go.uber.org/automaxprocs"
 )
 
+var (
+	defaultFrameLogger  = &logger.LoggerConfig{Path: []string{"..", "log", "frame.log"}, LogLevel: "info"}
+	defaultAccessLogger = &logger.LoggerConfig{Path: []string{"..", "log", "access.log"}, LogLevel: "info"}
+	defaultPanicLogger  = &logger.LoggerConfig{Path: []string{"..", "log", "panic.log"}, LogLevel: "error"}
+)
+
 type Server struct {
 	g *grpc.Server
 	m *runtime.ServeMux
 	c *Config
 
-	e    *event.EventHub
-	lfra *logger.Logger
-	lacc *logger.Logger
+	e           *event.EventHub
+	panicLogger *logger.Logger
+	accLogger   *logger.Logger
+	frameLogger *logger.Logger
 
 	withFlags bool
 }
@@ -49,7 +56,10 @@ func New(c *Config, opts ...options.ServerOption) (*Server, error) {
 		event.WithConsumer(uint32(EventTypeLog), s.evLogger),
 	)
 	s.e = ev
-	s.g = grpc.NewServer(grpc.UnaryInterceptor(interceptors.AccessInterceptor(s.lacc)))
+	s.g = grpc.NewServer(
+		grpc.UnaryInterceptor(interceptors.AccessInterceptor(s.accLogger)),
+		grpc.UnaryInterceptor(interceptors.PanicInterceptor(s.panicLogger)),
+	)
 	reflection.Register(s.g)
 
 	for _, opt := range opts {
@@ -65,17 +75,33 @@ func (s *Server) RegisterFlagsHandler() {
 
 func (s *Server) initLogger() error {
 
+	if s.c.FrameLogger == nil {
+		s.c.FrameLogger = defaultFrameLogger
+	}
+	if s.c.AccessLogger == nil {
+		s.c.AccessLogger = defaultAccessLogger
+	}
+	if s.c.PanicLogger == nil {
+		s.c.AccessLogger = defaultPanicLogger
+	}
+
 	lg, err := logger.NewLogger(s.c.FrameLogger)
 	if err != nil {
 		return err
 	}
-	s.lfra = lg
+	s.frameLogger = lg
 
 	sl, err := logger.NewLogger(s.c.AccessLogger)
 	if err != nil {
 		return err
 	}
-	s.lacc = sl
+	s.accLogger = sl
+
+	pl, err := logger.NewLogger(s.c.PanicLogger)
+	if err != nil {
+		return err
+	}
+	s.panicLogger = pl
 
 	return nil
 }
@@ -107,10 +133,9 @@ func (s *Server) ListenAndServe() error {
 		}
 	}
 
-	defer s.lfra.Sync()
-	if s.lacc != nil {
-		defer s.lacc.Sync()
-	}
+	defer s.frameLogger.Sync()
+	defer s.frameLogger.Sync()
+	defer s.panicLogger.Sync()
 
 	eg := errgroup.Group{}
 
@@ -137,37 +162,37 @@ func (s *Server) Stop() {
 
 func (s *Server) serveHTTPServer() error {
 	s.m = runtime.NewServeMux()
-	s.lfra.Info("[Server] http server started succ", "port", s.c.HTTP.Port)
+	s.frameLogger.Info("[Server] http server started succ", "port", s.c.HTTP.Port)
 	s.e.Publish(&Event{typ: EventTypeLog, data: fmt.Sprintf("[Server] http server stared on: %d", s.c.HTTP.Port)})
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", s.c.HTTP.Port), s.m); err != nil {
-		s.lfra.Info("[Server] http server started fail", "port", s.c.HTTP.Port, "err", err.Error())
+		s.frameLogger.Info("[Server] http server started fail", "port", s.c.HTTP.Port, "err", err.Error())
 		return err
 	}
 	return nil
 }
 
 func (s *Server) serveGRPCServer() error {
-	s.lfra.Info("[Server] gRPC server started succ", "port", s.c.GRPC.Port)
+	s.frameLogger.Info("[Server] gRPC server started succ", "port", s.c.GRPC.Port)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.c.GRPC.Port))
 	if err != nil {
-		s.lfra.Info("[Server] gRPC server started fail", "port", s.c.GRPC.Port, "err", err.Error())
+		s.frameLogger.Info("[Server] gRPC server started fail", "port", s.c.GRPC.Port, "err", err.Error())
 		return err
 	}
 	s.e.Publish(&Event{typ: EventTypeLog, data: fmt.Sprintf("[Server] gRPC server stared on: %d", s.c.GRPC.Port)})
 	err = s.g.Serve(lis)
 	if err != nil {
-		s.lfra.Info("[Server] gRPC server started fail", "port", s.c.GRPC.Port, "err", err.Error())
+		s.frameLogger.Info("[Server] gRPC server started fail", "port", s.c.GRPC.Port, "err", err.Error())
 		return err
 	}
 	return nil
 }
 
 func (s *Server) evLogger(msg event.Event) error {
-	s.lfra.Debug("[Server]", "EvType", msg.Type(), "Ev", msg.Data())
+	s.frameLogger.Debug("[Server]", "EvType", msg.Type(), "Ev", msg.Data())
 	return nil
 }
 
 func (s *Server) RegisterGRPCHandler(sd *grpc.ServiceDesc, handler interface{}) {
 	s.g.RegisterService(sd, handler)
-	s.lfra.Info("[Server] gRPC router registed", "desc", sd.ServiceName)
+	s.frameLogger.Info("[Server] gRPC router registed", "desc", sd.ServiceName)
 }
