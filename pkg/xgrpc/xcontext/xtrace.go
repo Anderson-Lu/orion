@@ -1,6 +1,8 @@
 package xcontext
 
 import (
+	"context"
+
 	"google.golang.org/grpc/metadata"
 )
 
@@ -18,4 +20,8 @@ type TracerHeader struct {
 
 func filterTraceMD(md metadata.MD) metadata.MD {
 	return nil
+}
+
+func BuildTraceHeader(ctx context.Context) *TracerHeader {
+	return &TracerHeader{}
 }

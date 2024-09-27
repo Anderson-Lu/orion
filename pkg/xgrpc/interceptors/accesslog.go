@@ -6,6 +6,7 @@ import (
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/uit/pkg/logger"
+	"github.com/uit/pkg/xgrpc/xcontext"
 	"google.golang.org/grpc"
 )
 
@@ -21,10 +22,11 @@ func AccessInterceptor(lg *logger.Logger) grpc.UnaryServerInterceptor {
 		if lg == nil {
 			return h, err
 		}
+		header := xcontext.BuildTraceHeader(ctx)
 		if err == nil {
-			lg.Info("[succ]", "method", method, "cost", time.Since(begin).Milliseconds(), "req", req, "rsp", h)
+			lg.Info("[succ]", "method", method, "cost", "request-id", header.RequestId, "clientIP", header.ClientIP, time.Since(begin).Milliseconds(), "req", req, "rsp", h)
 		} else {
-			lg.Error("[fail]", "method", method, "cost", time.Since(begin).Milliseconds(), "req", req, "rsp", h, "err", err)
+			lg.Error("[fail]", "method", method, "cost", "request-id", header.RequestId, "clientIP", header.ClientIP, time.Since(begin).Milliseconds(), "req", req, "rsp", h, "err", err)
 		}
 		return h, err
 	}
