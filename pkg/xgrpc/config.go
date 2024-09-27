@@ -12,17 +12,17 @@ type HTTPConfig struct {
 	Port   uint32 `default:"8080"`
 }
 
-type PProfConfig struct {
+type PromtheusConfig struct {
 	Enable bool   `default:"true"`
 	Port   uint32 `default:"8082"`
 }
 
 type Config struct {
-	GRPC          *GRPCConfig
-	HTTP          *HTTPConfig
-	PProf         *PProfConfig
-	FrameLogger   *logger.LoggerConfig
-	AccessLogger  *logger.LoggerConfig
-	ServiceLogger *logger.LoggerConfig
-	PanicLogger   *logger.LoggerConfig
+	GRPC            *GRPCConfig
+	HTTP            *HTTPConfig
+	PromtheusConfig *PromtheusConfig
+	FrameLogger     *logger.LoggerConfig
+	AccessLogger    *logger.LoggerConfig
+	ServiceLogger   *logger.LoggerConfig
+	PanicLogger     *logger.LoggerConfig
 }

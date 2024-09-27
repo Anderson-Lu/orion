@@ -10,10 +10,9 @@ import (
 	"github.com/uit/pkg/logger"
 	"github.com/uit/pkg/xgrpc/build"
 	"github.com/uit/pkg/xgrpc/interceptors"
-	"github.com/uit/pkg/xgrpc/options"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/uit/pkg/event"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -32,45 +31,41 @@ var (
 type Server struct {
 	g *grpc.Server
 	m *runtime.ServeMux
+	p *http.ServeMux
 	c *Config
 
-	e           *event.EventHub
 	panicLogger *logger.Logger
 	accLogger   *logger.Logger
 	frameLogger *logger.Logger
 
-	withFlags bool
+	cmdMode bool
 }
 
-func New(c *Config, opts ...options.ServerOption) (*Server, error) {
-
+func New(c *Config, opts ...ServerOption) (*Server, error) {
 	s := &Server{c: c}
-
 	if err := s.initLogger(); err != nil {
 		return nil, err
 	}
-
-	ev := event.NewEventHub(
-		100,
-		event.WithMultiDiapatcher(10),
-		event.WithConsumer(uint32(EventTypeLog), s.evLogger),
-	)
-	s.e = ev
-	s.g = grpc.NewServer(
-		grpc.UnaryInterceptor(interceptors.AccessInterceptor(s.accLogger)),
-		grpc.UnaryInterceptor(interceptors.PanicInterceptor(s.panicLogger)),
-	)
-	reflection.Register(s.g)
-
-	for _, opt := range opts {
-		opt(s)
-	}
-
+	s.initGrpcServer()
+	s.initOptions()
 	return s, nil
 }
 
-func (s *Server) RegisterFlagsHandler() {
-	s.withFlags = true
+func (s *Server) initOptions(opts ...ServerOption) {
+	for _, opt := range opts {
+		opt(s)
+	}
+}
+
+func (s *Server) initGrpcServer() {
+	s.g = grpc.NewServer(
+		grpc.UnaryInterceptor(interceptors.ChainInterceptors(
+			interceptors.ContextWrapperInterceptor(s.frameLogger),
+			interceptors.AccessInterceptor(s.accLogger),
+			interceptors.PanicInterceptor(s.panicLogger),
+		)),
+	)
+	reflection.Register(s.g)
 }
 
 func (s *Server) initLogger() error {
@@ -106,14 +101,6 @@ func (s *Server) initLogger() error {
 	return nil
 }
 
-func (s *Server) GRPCServer() *grpc.Server {
-	return s.g
-}
-
-func (s *Server) MuxServer() *runtime.ServeMux {
-	return s.m
-}
-
 func (s *Server) serveFlags() bool {
 	for _, args := range os.Args {
 		switch args {
@@ -127,7 +114,7 @@ func (s *Server) serveFlags() bool {
 
 func (s *Server) ListenAndServe() error {
 
-	if s.withFlags {
+	if s.cmdMode {
 		if ok := s.serveFlags(); ok {
 			return nil
 		}
@@ -138,32 +125,47 @@ func (s *Server) ListenAndServe() error {
 	defer s.panicLogger.Sync()
 
 	eg := errgroup.Group{}
-
 	eg.Go(func() error {
 		if s.c.GRPC != nil && s.c.GRPC.Enable {
-			return s.serveGRPCServer()
+			return s.runGRPCServer()
 		}
 		return nil
 	})
 
 	eg.Go(func() error {
 		if s.c.HTTP != nil && s.c.HTTP.Enable {
-			return s.serveHTTPServer()
+			return s.runGRPCGateway()
 		}
 		return nil
 	})
 
+	eg.Go(func() error {
+		if s.c.PromtheusConfig == nil || !s.c.PromtheusConfig.Enable || s.c.PromtheusConfig.Port == 0 {
+			return nil
+		}
+		return s.runPromtheusMetrics()
+	})
 	return eg.Wait()
 }
 
 func (s *Server) Stop() {
-
+	s.frameLogger.Info("[Server] server stopped", "port", s.c.GRPC.Port)
 }
 
-func (s *Server) serveHTTPServer() error {
+func (s *Server) runPromtheusMetrics() error {
+	s.p = http.NewServeMux()
+	s.p.Handle("/metrics", promhttp.Handler())
+	s.frameLogger.Info("[Server] promtheus metrics server started succ", "port", s.c.PromtheusConfig.Port)
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", s.c.PromtheusConfig.Port), s.p); err != nil {
+		s.frameLogger.Info("[Server] promtheus metrics server started fail", "port", s.c.PromtheusConfig.Port, "err", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (s *Server) runGRPCGateway() error {
 	s.m = runtime.NewServeMux()
 	s.frameLogger.Info("[Server] http server started succ", "port", s.c.HTTP.Port)
-	s.e.Publish(&Event{typ: EventTypeLog, data: fmt.Sprintf("[Server] http server stared on: %d", s.c.HTTP.Port)})
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", s.c.HTTP.Port), s.m); err != nil {
 		s.frameLogger.Info("[Server] http server started fail", "port", s.c.HTTP.Port, "err", err.Error())
 		return err
@@ -171,28 +173,17 @@ func (s *Server) serveHTTPServer() error {
 	return nil
 }
 
-func (s *Server) serveGRPCServer() error {
+func (s *Server) runGRPCServer() error {
 	s.frameLogger.Info("[Server] gRPC server started succ", "port", s.c.GRPC.Port)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.c.GRPC.Port))
 	if err != nil {
 		s.frameLogger.Info("[Server] gRPC server started fail", "port", s.c.GRPC.Port, "err", err.Error())
 		return err
 	}
-	s.e.Publish(&Event{typ: EventTypeLog, data: fmt.Sprintf("[Server] gRPC server stared on: %d", s.c.GRPC.Port)})
 	err = s.g.Serve(lis)
 	if err != nil {
 		s.frameLogger.Info("[Server] gRPC server started fail", "port", s.c.GRPC.Port, "err", err.Error())
 		return err
 	}
 	return nil
-}
-
-func (s *Server) evLogger(msg event.Event) error {
-	s.frameLogger.Debug("[Server]", "EvType", msg.Type(), "Ev", msg.Data())
-	return nil
-}
-
-func (s *Server) RegisterGRPCHandler(sd *grpc.ServiceDesc, handler interface{}) {
-	s.g.RegisterService(sd, handler)
-	s.frameLogger.Info("[Server] gRPC router registed", "desc", sd.ServiceName)
 }

@@ -17,12 +17,92 @@ UIT是一个基于GRPC的微服务框架，通过UIT可以快速构建同时支�
 
 ## 快速开始
 
+#### 1. 定义服务协议
+
+如: `example/proto/todo/todo.proto`
+
+```proto
+syntax = "proto3";
+
+package todo;
+
+option go_package = "github.com/uit/proto_go/uit/todo";
+
+// TodoStatus 状态
+enum TodoStatus {
+    TodoStatusNone = 0;
+    TodoStatusStarted = 1;
+    TodoStatusFinished = 2;
+}
+
+// TodoItem 条目
+message TodoItem {
+    string id = 1;
+    string title = 2;
+    string desc = 3;
+    repeated string tags = 4;
+}
+
+message AddReq {}
+
+message AddRsp {}
+
+message ListReq {}
+
+message ListRsp {
+    repeated TodoItem items = 1;
+}
+
+message RemoveReq {}
+
+message RemoveRsp {}
+
+message ModifyReq {}
+
+message ModifyRsp{}
+
+service UitTodo {
+    rpc Add(AddReq) returns (AddRsp);
+    rpc Remove(RemoveReq) returns (RemoveRsp);
+    rpc List(ListReq) returns (ListRsp);
+    rpc Modify(ModifyReq) returns (ModifyRsp);
+}
+```
+
+#### 2. 编译协议
+
+```shell
+cd example
+make proto
+```
+
+#### 3. 实现服务
+
+如: `example/service/service.go`
+
+```go
+type Service struct {}
+
+func (s *Service) Add(ctx context.Context, in *todo.AddReq) (*todo.AddRsp, error) {...}
+func (s *Service) Remove(ctx context.Context, in *todo.RemoveReq) (*todo.RemoveRsp, error) {...}
+func (s *Service) List(ctx context.Context, in *todo.ListReq) (*todo.ListRsp, error) {...}
+func (s *Service) Add(ctx context.Context, in *todo.ModifyReq) (*todo.ModifyRsp, error) {...}
+```
+
+#### 4. 运行服务
+
 ```shell
 git clone https://github.com/Anderson-Lu/uit.git
 
 cd example/cmd
 
 go run main.go
+```
+
+##### 5. 构建服务
+
+```shell
+make build
 ```
 
 ## 日志拆分
