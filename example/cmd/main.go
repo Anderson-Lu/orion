@@ -14,8 +14,7 @@ import (
 func main() {
 
 	c := &xgrpc.Config{
-		GRPC:            &xgrpc.GRPCConfig{Enable: true, Port: 8081},
-		HTTP:            &xgrpc.HTTPConfig{Enable: true, Port: 8080},
+		Server:          &xgrpc.ServerConfig{Port: 8080, EnableGRPCGateway: true},
 		PromtheusConfig: &xgrpc.PromtheusConfig{Enable: true, Port: 9092},
 		FrameLogger:     &logger.LoggerConfig{Path: []string{"..", "log", "frame.log"}, LogLevel: "info"},
 		AccessLogger:    &logger.LoggerConfig{Path: []string{"..", "log", "access.log"}},
@@ -26,6 +25,7 @@ func main() {
 	handler, _ := service.NewService(c)
 	server, err := xgrpc.New(c,
 		xgrpc.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),
+		xgrpc.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint),
 		xgrpc.WithFlags(),
 	)
 	if err != nil {

@@ -2,14 +2,9 @@ package xgrpc
 
 import "github.com/uit/pkg/logger"
 
-type GRPCConfig struct {
-	Enable bool   `default:"true"`
-	Port   uint32 `default:"8081"`
-}
-
-type HTTPConfig struct {
-	Enable bool   `default:"true"`
-	Port   uint32 `default:"8080"`
+type ServerConfig struct {
+	Port              uint32 `default:"8081"`
+	EnableGRPCGateway bool   `default:"true"`
 }
 
 type PromtheusConfig struct {
@@ -18,8 +13,7 @@ type PromtheusConfig struct {
 }
 
 type Config struct {
-	GRPC            *GRPCConfig
-	HTTP            *HTTPConfig
+	Server          *ServerConfig
 	PromtheusConfig *PromtheusConfig
 	FrameLogger     *logger.LoggerConfig
 	AccessLogger    *logger.LoggerConfig

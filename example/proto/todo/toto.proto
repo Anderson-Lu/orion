@@ -19,7 +19,9 @@ message TodoItem {
     repeated string tags = 4;
 }
 
-message AddReq {}
+message AddReq {
+    TodoItem item = 1; 
+}
 
 message AddRsp {}
 

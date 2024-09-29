@@ -25,4 +25,4 @@ build-version:
 	./build/"$(app_name)" -v
 
 proto:
-	for fsName in `ls "$(proto_path)"`; do echo "protoc ...""$(proto_path)/$$fsName"; protoc --go_out=proto_go --go_opt=paths=source_relative --go-grpc_out=proto_go --go-grpc_opt=paths=source_relative --grpc-gateway_out=proto_go --grpc-gateway_opt=paths=source_relative $(proto_path)/$$fsName; done;
+	for fsName in `ls "$(proto_path)"`; do echo "protoc >> ""$(proto_path)/$$fsName"; protoc --go_out=proto_go --go_opt=paths=source_relative --go-grpc_out=proto_go --go-grpc_opt=paths=source_relative --grpc-gateway_out=proto_go --grpc-gateway_opt=paths=source_relative --grpc-gateway_opt=generate_unbound_methods=true $(proto_path)/$$fsName; done;

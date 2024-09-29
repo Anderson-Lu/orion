@@ -105,6 +105,24 @@ go run main.go
 make build
 ```
 
+## 提供HTTP服务
+
+使用`grpc-gateway`插件为服务提供http服务, 支持在同一个端口同时支持GRPC和HTTP协议,配置项:
+
+```go
+server, err := xgrpc.New(c,
+	xgrpc.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),                  // 支持 grpc 协议
+	xgrpc.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint), // 支持 http 协议
+	...
+)
+```
+
+之后可以使用http访问grpc服务:
+
+```shell
+curl -XPOST 'http://127.0.0.1:8080/todo.UitTodo/Add' -H 'Content-Type:application/grpc' -d '{"item":{"title":"title","desc":"desc","tags":["1","2"]}}'
+```
+
 ## 日志拆分
 
 uit默认支持以下4种日志,分别为:
