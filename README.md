@@ -5,7 +5,7 @@
   )(__)(  _)(_   )(  
  (______)(____) (__)  v0.0.1
 ```
-UIT是一个基于GRPC的微服务框架，通过UIT可以快速构建同时支持GRPC以及HTTP的微服务，极大提升业务开发效率。
+**UIT**是一个基于**GRPC**的微服务框架，通过**UIT**可以快速构建同时支持GRPC以及HTTP的微服务,避免重复造轮子,从而提升业务开发效率。
 
 ## 功能预览
 
@@ -91,12 +91,45 @@ func (s *Service) Add(ctx context.Context, in *todo.ModifyReq) (*todo.ModifyRsp,
 
 #### 4. 运行服务
 
-```shell
-git clone https://github.com/Anderson-Lu/uit.git
+```go
+package main
 
-cd example/cmd
+import (
+	"log"
 
-go run main.go
+	"github.com/uit/pkg/logger"
+	"github.com/uit/pkg/uit"
+	_ "github.com/uit/pkg/uit/build"
+
+	"github.com/uit/example/proto_go/proto/todo"
+	"github.com/uit/example/service"
+)
+
+func main() {
+
+	c := &uit.Config{
+		Server:          &uit.ServerConfig{Port: 8080, EnableGRPCGateway: true},
+		PromtheusConfig: &uit.PromtheusConfig{Enable: true, Port: 9092},
+		FrameLogger:     &logger.LoggerConfig{Path: []string{"..", "log", "frame.log"}, LogLevel: "info"},
+		AccessLogger:    &logger.LoggerConfig{Path: []string{"..", "log", "access.log"}},
+		ServiceLogger:   &logger.LoggerConfig{Path: []string{"..", "log", "service.log"}},
+		PanicLogger:     &logger.LoggerConfig{Path: []string{"..", "log", "panic.log"}},
+	}
+
+	handler, _ := service.NewService(c)
+	server, err := uit.New(c,
+		uit.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),
+		uit.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint),
+		uit.WithFlags(),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := server.ListenAndServe(); err != nil {
+		log.Fatal(err)
+	}
+}
 ```
 
 ##### 5. 构建服务
@@ -123,6 +156,19 @@ server, err := uit.New(c,
 curl -XPOST 'http://127.0.0.1:8080/todo.UitTodo/Add' -H 'Content-Type:application/grpc' -d '{"item":{"title":"title","desc":"desc","tags":["1","2"]}}'
 ```
 
+使用grpctool访问grpc服务:
+
+```shell
+grpcurl -plaintext 127.0.0.1:8080 list
+> todo.UitTodo
+
+grpcurl -plaintext 127.0.0.1:8080 list todo.UitTodo
+> todo.UitTodo.Add
+> todo.UitTodo.List
+> todo.UitTodo.Modify
+> todo.UitTodo.Remove
+```
+
 ## 日志拆分
 
 uit默认支持以下4种日志,分别为:
@@ -143,6 +189,18 @@ c := &uit.Config{
   PanicLogger:   &logger.LoggerConfig{Path: []string{"..", "log", "panic.log"}},
   ...
 }
+```
+
+**access.log** 举例:
+
+```log
+{"level":"info","time":"2024-01-29T10:58:42.613+0800","caller":"interceptors/accesslog.go:27","message":"[succ]","method":"/todo.UitTodo/Add","requestId":"","clientIP":"","req":"item:{title:\"title\"  desc:\"desc\"  tags:\"1\"  tags:\"2\"}","rsp":"","cost":0}
+```
+
+**frame.log** 举例:
+
+```log
+{"level":"info","time":"2024-01-29T10:58:39.841+0800","caller":"uit/server.go:175","message":"[Server] gRPC server started succ","port":8080}
 ```
 
 ## 容器性能优化
