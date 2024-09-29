@@ -17,6 +17,7 @@
 - **日志集成** 支持按照框架层、业务层分层输出，同时支持日志文件定期分割和清理清理等能力。
 - **可观测性** 集成pprof metrics指标上报,接入Prometheus后可观测服务/接口等维度的各项健康指标(CPU/Memory/Routines/Fds等)。
 - **链路追踪** 支持分布式链路追踪,帮助更快更方便排查和定位服务潜在问题。
+- **工具集成** 集成常用的工具集
 
 ## 快速开始
 
@@ -120,7 +121,8 @@ func main() {
 	}
 
 	handler, _ := service.NewService(c)
-	server, err := uit.New(c,
+	server, err := uit.New(
+    uit.WithConfigFile("../config/config.toml"),
 		uit.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),
 		uit.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint),
 		uit.WithFlags(),
@@ -139,6 +141,45 @@ func main() {
 
 ```shell
 make build
+```
+
+## 配置文件
+
+UIT支持多种格式的配置文件, 如`json`,`yaml`和`toml`. 在初始化框架服务时指定即可,
+
+```go
+server, err := uit.New(
+	uit.WithConfigFile("../config/config.toml"),
+  // uit.WithConfigFile("../config/config.json"),
+  // uit.WithConfigFile("../config/config.yaml"),
+  // uit.WithConfig(&uit.Config{...}),
+	...
+)
+```
+
+配置项举例:
+
+```yaml
+Server:
+  Port: 8080
+  EnableGRPCGateway: true
+
+PromtheusConfig:
+  Enable: true
+  Port: 9092
+
+FrameLogger:
+  Path: ['..','log','frame.log']
+  LogLevel: 'info'
+
+AccessLogger:
+  Path: ['..','log','access.log']
+
+PanicLogger:
+  Path: ['..','log','panic.log']
+
+ServiceLogger:
+  Path: ['..','log','service.log']
 ```
 
 ## 服务发现和注册

@@ -47,28 +47,33 @@ type Server struct {
 	accLogger   *logger.Logger
 	frameLogger *logger.Logger
 
-	cmdMode     bool
-	grpcOpts    []grpc.DialOption
-	gatewayFunc func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
+	cmdMode      bool
+	grpcOpts     []grpc.DialOption
+	gatewayFunc  func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
+	grpcHandlers map[interface{}][]*grpc.ServiceDesc
 }
 
-func New(c *Config, opts ...ServerOption) (*Server, error) {
-	s := &Server{c: c}
+func New(opts ...ServerOption) (*Server, error) {
+	s := &Server{}
+	if err := s.initOptions(opts...); err != nil {
+		return nil, err
+	}
+
 	if err := s.initLogger(); err != nil {
 		return nil, err
 	}
 
 	s.grpcOpts = defaultGRPCOptions
-	s.initGrpcServer()
-	s.initOptions(opts...)
-
 	return s, nil
 }
 
-func (s *Server) initOptions(opts ...ServerOption) {
+func (s *Server) initOptions(opts ...ServerOption) error {
 	for _, opt := range opts {
-		opt(s)
+		if err := opt(s); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func (s *Server) initGrpcServer() {
@@ -80,6 +85,11 @@ func (s *Server) initGrpcServer() {
 		)),
 	)
 	reflection.Register(s.gServer)
+	for handler, sds := range s.grpcHandlers {
+		for _, sd := range sds {
+			s.gServer.RegisterService(sd, handler)
+		}
+	}
 }
 
 func (s *Server) initLogger() error {
@@ -172,7 +182,7 @@ func (s *Server) runPromtheusMetrics() error {
 
 func (s *Server) start() error {
 
-	s.frameLogger.Info("[Server] gRPC server started succ", "port", s.c.Server.Port)
+	s.initGrpcServer()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.c.Server.Port))
 	if err != nil {
@@ -182,6 +192,7 @@ func (s *Server) start() error {
 
 	// only grpc server
 	if !s.c.Server.EnableGRPCGateway {
+		s.frameLogger.Info("[Server] gRPC server started succ", "port", s.c.Server.Port)
 		err = s.gServer.Serve(lis)
 		if err != nil {
 			s.frameLogger.Info("[Server] gRPC server started fail", "port", s.c.Server.Port, "err", err.Error())

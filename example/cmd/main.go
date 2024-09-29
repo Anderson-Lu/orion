@@ -23,7 +23,8 @@ func main() {
 	}
 
 	handler, _ := service.NewService(c)
-	server, err := uit.New(c,
+	server, err := uit.New(
+		uit.WithConfigFile("../config/config.toml"),
 		uit.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),
 		uit.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint),
 		uit.WithFlags(),

@@ -16,12 +16,12 @@ type Logger struct {
 }
 
 type LoggerConfig struct {
-	Path              []string
-	LogFileMaxSizeMB  int
-	LogFileMaxBackups int
-	LogMaxAgeDays     int
-	LogCompress       bool
-	LogLevel          string
+	Path              []string `yaml:"Path" json:"Path" toml:"Path"`
+	LogFileMaxSizeMB  int      `yaml:"LogFileMaxSizeMB" json:"LogFileMaxSizeMB" toml:"LogFileMaxSizeMB"`
+	LogFileMaxBackups int      `yaml:"LogFileMaxBackups" json:"LogFileMaxBackups" toml:"LogFileMaxBackups"`
+	LogMaxAgeDays     int      `yaml:"LogMaxAgeDays" json:"LogMaxAgeDays" toml:"LogMaxAgeDays"`
+	LogCompress       bool     `yaml:"LogCompress" json:"LogCompress" toml:"LogCompress"`
+	LogLevel          string   `yaml:"LogLevel" json:"LogLevel" toml:"LogLevel"`
 }
 
 func (l *LoggerConfig) check() {
