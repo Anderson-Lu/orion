@@ -9,7 +9,7 @@ var (
 	BuildTime      = ""
 	BuildCommit    = ""
 	BuildGoVersion = ""
-	XGRPCVersion   = "dev0.0.2"
+	UitVersion     = "dev0.0.2"
 )
 
 func PrintVerbose() {
@@ -17,5 +17,5 @@ func PrintVerbose() {
 	fmt.Printf("Git Commit     : %s \n", BuildCommit)
 	fmt.Printf("Built Time     : %s \n", BuildTime)
 	fmt.Printf("Go Version     : %s \n", BuildGoVersion)
-	fmt.Printf("XGRPC Version  : %s \n", XGRPCVersion)
+	fmt.Printf("Uit Version  : %s \n", UitVersion)
 }

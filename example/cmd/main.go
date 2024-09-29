@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/uit/pkg/logger"
-	"github.com/uit/pkg/xgrpc"
-	_ "github.com/uit/pkg/xgrpc/build"
+	"github.com/uit/pkg/uit"
+	_ "github.com/uit/pkg/uit/build"
 
 	"github.com/uit/example/proto_go/proto/todo"
 	"github.com/uit/example/service"
@@ -13,9 +13,9 @@ import (
 
 func main() {
 
-	c := &xgrpc.Config{
-		Server:          &xgrpc.ServerConfig{Port: 8080, EnableGRPCGateway: true},
-		PromtheusConfig: &xgrpc.PromtheusConfig{Enable: true, Port: 9092},
+	c := &uit.Config{
+		Server:          &uit.ServerConfig{Port: 8080, EnableGRPCGateway: true},
+		PromtheusConfig: &uit.PromtheusConfig{Enable: true, Port: 9092},
 		FrameLogger:     &logger.LoggerConfig{Path: []string{"..", "log", "frame.log"}, LogLevel: "info"},
 		AccessLogger:    &logger.LoggerConfig{Path: []string{"..", "log", "access.log"}},
 		ServiceLogger:   &logger.LoggerConfig{Path: []string{"..", "log", "service.log"}},
@@ -23,10 +23,10 @@ func main() {
 	}
 
 	handler, _ := service.NewService(c)
-	server, err := xgrpc.New(c,
-		xgrpc.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),
-		xgrpc.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint),
-		xgrpc.WithFlags(),
+	server, err := uit.New(c,
+		uit.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),
+		uit.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint),
+		uit.WithFlags(),
 	)
 	if err != nil {
 		log.Fatal(err)

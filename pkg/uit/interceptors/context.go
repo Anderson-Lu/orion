@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/uit/pkg/logger"
-	"github.com/uit/pkg/xgrpc/xcontext"
+	"github.com/uit/pkg/uit/xcontext"
 	"google.golang.org/grpc"
 )
 

@@ -6,7 +6,7 @@ import (
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/uit/pkg/logger"
-	"github.com/uit/pkg/xgrpc/xcontext"
+	"github.com/uit/pkg/uit/xcontext"
 	"google.golang.org/grpc"
 )
 

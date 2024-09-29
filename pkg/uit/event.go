@@ -1,4 +1,4 @@
-package xgrpc
+package uit
 
 const (
 	EventTypeLog int16 = 1

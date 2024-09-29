@@ -1,4 +1,4 @@
-package xgrpc
+package uit
 
 import "github.com/uit/pkg/logger"
 

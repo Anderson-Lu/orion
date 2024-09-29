@@ -1,4 +1,4 @@
-package xgrpc
+package uit
 
 import (
 	"context"
@@ -10,8 +10,8 @@ import (
 	"net/http"
 
 	"github.com/uit/pkg/logger"
-	"github.com/uit/pkg/xgrpc/build"
-	"github.com/uit/pkg/xgrpc/interceptors"
+	"github.com/uit/pkg/uit/build"
+	"github.com/uit/pkg/uit/interceptors"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
