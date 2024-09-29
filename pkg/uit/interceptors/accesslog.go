@@ -24,9 +24,9 @@ func AccessInterceptor(lg *logger.Logger) grpc.UnaryServerInterceptor {
 		}
 		header := xcontext.BuildTraceHeader(ctx)
 		if err == nil {
-			lg.Info("[succ]", "method", method, "requestId", header.RequestId, "clientIP", header.ClientIP, "req", req, "rsp", h, "cost", time.Since(begin).Milliseconds())
+			lg.Info("[succ]", "method", method, "requestId", header.RequestId, "forward", header.Forward, "req", req, "rsp", h, "cost", time.Since(begin).Milliseconds())
 		} else {
-			lg.Error("[fail]", "method", method, "requestId", header.RequestId, "clientIP", header.ClientIP, "req", req, "rsp", h, "err", err, "cost", time.Since(begin).Milliseconds())
+			lg.Error("[fail]", "method", method, "requestId", header.RequestId, "forward", header.Forward, "req", req, "rsp", h, "err", err, "cost", time.Since(begin).Milliseconds())
 		}
 		return h, err
 	}

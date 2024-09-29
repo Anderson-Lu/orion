@@ -205,7 +205,6 @@ func (s *Server) start() error {
 
 	// both grpc server and http server in one port
 	integrateServer := h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("----<>", r.Header)
 		if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
 			s.gServer.ServeHTTP(w, r)
 		} else {

@@ -1,9 +1,7 @@
-## makefile tmeplate for uit framework
-
 git_rev    = $(shell git rev-parse --short HEAD)
 git_branch = $(shell git rev-parse --abbrev-ref HEAD)
-app_name   = "example"
-proto_path = "./proto/todo"
+app_name   = "your service name"
+proto_path = "your proto path"
 
 BuildVersion := $(git_branch)_$(git_rev)
 BuildTime := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
@@ -27,4 +25,4 @@ build-version:
 	./build/"$(app_name)" -v
 
 proto:
-	for fsName in `ls "$(proto_path)"`; do echo "protoc ...""$(proto_path)/$$fsName"; protoc --go_out=proto_go --go_opt=paths=source_relative --go-grpc_out=proto_go --go-grpc_opt=paths=source_relative --grpc-gateway_out=proto_go --grpc-gateway_opt=paths=source_relative $(proto_path)/$$fsName; done;
+	for fsName in `ls "$(proto_path)"`; do echo "protoc >> ""$(proto_path)/$$fsName"; protoc --go_out=proto_go --go_opt=paths=source_relative --go-grpc_out=proto_go --go-grpc_opt=paths=source_relative --grpc-gateway_out=proto_go --grpc-gateway_opt=paths=source_relative --grpc-gateway_opt=generate_unbound_methods=true $(proto_path)/$$fsName; done;
