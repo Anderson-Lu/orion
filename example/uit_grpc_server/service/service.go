@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/uit/example/proto_go/proto/todo"
+	"github.com/uit/example/uit_grpc_server/proto_go/proto/todo"
 	"github.com/uit/pkg/logger"
 	"github.com/uit/pkg/uit"
 )

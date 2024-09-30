@@ -7,8 +7,8 @@ import (
 	"github.com/uit/pkg/uit"
 	_ "github.com/uit/pkg/uit/build"
 
-	"github.com/uit/example/proto_go/proto/todo"
-	"github.com/uit/example/service"
+	"github.com/uit/example/uit_grpc_server/proto_go/proto/todo"
+	"github.com/uit/example/uit_grpc_server/service"
 )
 
 func main() {

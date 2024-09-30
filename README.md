@@ -7,8 +7,8 @@
 ```
 **UIT**是一个基于**GRPC**的微服务框架，通过**UIT**可以快速构建GRPC微服务.
 
-- 避免重复造轮子,提升业务开发效率
-- 优雅编程
+- 避免重复造轮子!!!
+- 优雅编程!!!
 
 ## 功能预览
 
@@ -105,8 +105,8 @@ import (
 	"github.com/uit/pkg/uit"
 	_ "github.com/uit/pkg/uit/build"
 
-	"github.com/uit/example/proto_go/proto/todo"
-	"github.com/uit/example/service"
+	"github.com/uit/example/uit_grpc_server/proto_go/proto/todo"
+	"github.com/uit/example/uit_grpc_server/service"
 )
 
 func main() {
@@ -306,3 +306,62 @@ Uit Version  : dev0.0.2
 ## 错误码
 
 UIT框架内置了一些错误码,原则上业务使用的错误码应当与框架的错误码区分开,详细信息可以参照`uit/pkg/uit/codes/codes.go`.
+
+## UIT优雅编程
+
+#### 本地缓存(uit_ticker_cache)
+
+一些本地需要初步缓存的场景,比如某些业务配置(强实时性不高),可以先在本地缓存一段时间后再刷新.在这种模式下,微服务场景可能涉及多个业务,多个组件都有相似的需求,因此,UIT统一封装了`ticker_cache`工具类,精简业务实现,避免各个业务自立山头.
+
+使用方式, 业务侧需要自己实现源数据的获取,实现以下接口:
+
+```go
+type IFetcher interface {
+	FetchFromOrigin(ctx context.Context, key string) (interface{}, error)
+}
+```
+
+然后将其作为参数传递给`ticker_cache`组件即可实现本地缓存的功能:
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/uit/pkg/utils/ticker_cache"
+)
+
+func main() {
+
+	tc := ticker_cache.New(
+		ticker_cache.WithOrigin(&BarCache{}), // 数据源刷新实现
+		ticker_cache.WithTTL(10),             // 缓存时长
+		ticker_cache.WithElimination(60),     // 惰性缓存清理(可选)
+	)
+
+	fooValue, err := tc.Get(context.Background(), "foo")
+	fmt.Println("fooValue", fooValue, "err", err)
+
+	barValue, err := tc.Get(context.Background(), "bar")
+	fmt.Println("barValue", barValue, "err", err)
+
+	time.Sleep(time.Second * 3)
+
+	fooValue, err = tc.Get(context.Background(), "foo")
+	fmt.Println("fooValue", fooValue, "err", err)
+
+	barValue, err = tc.Get(context.Background(), "bar")
+	fmt.Println("barValue", barValue, "err", err)
+
+}
+
+type BarCache struct{}
+
+func (b *BarCache) FetchFromOrigin(ctx context.Context, key string) (interface{}, error) {
+	// use your logic, for example, fetch data from redis, mysql or any other middlewares.
+	return fmt.Sprintf("key [%s] at [%d]", key, time.Now().Unix()), nil
+}
+```
