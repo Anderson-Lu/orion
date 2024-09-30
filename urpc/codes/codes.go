@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	ErrCodeNone      = 0    // none
-	ErrCodeUndefined = 4000 // some errors not defined
+	ErrCodeNone        = 0    // none
+	ErrCodeUndefined   = 4000 // some errors not defined
+	ErrCodeRateLimited = 4001 // ratelimit
 )
 
 func GetCodeFromError(err error) int {

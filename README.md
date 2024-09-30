@@ -101,9 +101,9 @@ package main
 import (
 	"log"
 
-	"github.com/uit/pkg/logger"
-	"github.com/uit/pkg/uit"
-	_ "github.com/uit/pkg/uit/build"
+	"github.com/uit/modules/logger"
+	"github.com/uit/modules/uit"
+	_ "github.com/uit/urpcbuild"
 
 	"github.com/uit/example/uit_grpc_server/proto_go/proto/todo"
 	"github.com/uit/example/uit_grpc_server/service"
@@ -219,6 +219,12 @@ grpcurl -plaintext 127.0.0.1:8080 list todo.UitTodo
 > todo.UitTodo.Remove
 ```
 
+## 限流熔断
+
+在传统微服务架构中,接口的限流一般是在被调进行的. 但随着新一代微服务架构的演变,一些限流能力通常会沉淀到sidecar(将其从框架本身移除,能做到更好的非业务侵入),通过`service mesh`等控制面统一下发和控制流量的方式为微服务提供高可用保证.然而,为了提供更多的便捷性,UIT框架本身也支持限流组件,不强制接入使用,也可以业务自己引用.
+
+
+
 ## 日志拆分
 
 uit默认支持以下4种日志,分别为:
@@ -262,7 +268,7 @@ c := &uit.Config{
 
 ## 自动注入构建版本
 
-支持以Makefile方式打包二进制程序并动态注入框架版本等信息, UIT内置了`github.com/uit/pkg/uit/build`包,提供注入支持,当然这是可选的,或者按需自定义实现自己的build注入
+支持以Makefile方式打包二进制程序并动态注入框架版本等信息, UIT内置了`github.com/uit/urpcbuild`包,提供注入支持,当然这是可选的,或者按需自定义实现自己的build注入
 
 ```makefile
 # makefile example
@@ -274,7 +280,7 @@ BuildVersion := $(git_branch)_$(git_rev)
 BuildTime := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
 BuildCommit := $(shell git rev-parse --short HEAD)
 BuildGoVersion := $(shell go version)
-BuilderPkg := "github.com/uit/pkg/uit/build"
+BuilderPkg := "github.com/uit/urpcbuild"
 
 GOLDFLAGS =  -X '$(BuilderPkg).BuildVersion=$(BuildVersion)'
 GOLDFLAGS += -X '$(BuilderPkg).BuildTime=$(BuildTime)'
@@ -331,7 +337,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/uit/pkg/utils/ticker_cache"
+	"github.com/uit/modules/utils/ticker_cache"
 )
 
 func main() {

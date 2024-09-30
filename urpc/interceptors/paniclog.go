@@ -4,7 +4,7 @@ import (
 	"runtime/debug"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
-	"github.com/uit/pkg/logger"
+	"github.com/uit/modules/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

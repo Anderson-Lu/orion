@@ -1,6 +1,6 @@
-package uit
+package urpc
 
-import "github.com/uit/pkg/logger"
+import "github.com/uit/modules/logger"
 
 type ServerConfig struct {
 	Port              uint32 `default:"8081" yaml:"Port" json:"Port" toml:"Port"`
@@ -19,4 +19,11 @@ type Config struct {
 	AccessLogger    *logger.LoggerConfig `yaml:"AccessLogger" json:"AccessLogger" toml:"AccessLogger"`
 	ServiceLogger   *logger.LoggerConfig `yaml:"ServiceLogger" json:"ServiceLogger" toml:"ServiceLogger"`
 	PanicLogger     *logger.LoggerConfig `yaml:"PanicLogger" json:"PanicLogger" toml:"PanicLogger"`
+	RateLimit       []*RateLimitConfig   `yaml:"RateLimit" json:"RateLimit" toml:"RateLimit"`
+}
+
+type RateLimitConfig struct {
+	Method        string `yaml:"Method" json:"Method" toml:"Method"`
+	Capacity      int    `yaml:"Capacity" json:"Capacity" toml:"Capacity"`
+	RatePerSecond int    `yaml:"RatePerSecond" json:"RatePerSecond" toml:"RatePerSecond"`
 }

@@ -1,4 +1,4 @@
-package uit
+package urpc
 
 const (
 	EventTypeLog int16 = 1

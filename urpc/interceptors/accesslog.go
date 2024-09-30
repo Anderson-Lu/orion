@@ -5,8 +5,8 @@ import (
 	"time"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/uit/pkg/logger"
-	"github.com/uit/pkg/uit/xcontext"
+	"github.com/uit/modules/logger"
+	"github.com/uit/urpc/xcontext"
 	"google.golang.org/grpc"
 )
 

@@ -1,11 +1,11 @@
-package uit
+package urpc
 
 import (
 	"context"
 	"errors"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/uit/pkg/uit/parser"
+	"github.com/uit/urpc/parser"
 	"google.golang.org/grpc"
 )
 

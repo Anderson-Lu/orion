@@ -2,11 +2,11 @@ package service
 
 import (
 	"github.com/uit/example/uit_grpc_server/proto_go/proto/todo"
-	"github.com/uit/pkg/logger"
-	"github.com/uit/pkg/uit"
+	"github.com/uit/modules/logger"
+	"github.com/uit/urpc"
 )
 
-func NewService(c *uit.Config) (*Service, error) {
+func NewService(c *urpc.Config) (*Service, error) {
 
 	lg, err := logger.NewLogger(c.ServiceLogger)
 	if err != nil {
@@ -20,7 +20,7 @@ func NewService(c *uit.Config) (*Service, error) {
 }
 
 type Service struct {
-	c *uit.Config
+	c *urpc.Config
 	l *logger.Logger
 	todo.UnimplementedUitTodoServer
 }

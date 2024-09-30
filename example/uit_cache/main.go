@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/uit/pkg/utils/ticker_cache"
+	"github.com/uit/modules/cache"
 )
 
 func main() {
 
-	tc := ticker_cache.New(
-		ticker_cache.WithOrigin(&BarCache{}),
-		ticker_cache.WithTTL(10),
-		ticker_cache.WithElimination(60),
+	tc := cache.New(
+		cache.WithOrigin(&BarCache{}),
+		cache.WithTTL(10),
+		cache.WithElimination(60),
 	)
 
 	fooValue, err := tc.Get(context.Background(), "foo")

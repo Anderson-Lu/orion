@@ -1,4 +1,4 @@
-package ticker_cache
+package cache
 
 import (
 	"context"

@@ -7,7 +7,7 @@ BuildVersion := $(git_branch)_$(git_rev)
 BuildTime := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
 BuildCommit := $(shell git rev-parse --short HEAD)
 BuildGoVersion := $(shell go version)
-BuilderPkg := "github.com/uit/pkg/uit/build"
+BuilderPkg := "github.com/uit/urpcbuild"
 
 GOLDFLAGS =  -X '$(BuilderPkg).BuildVersion=$(BuildVersion)'
 GOLDFLAGS += -X '$(BuilderPkg).BuildTime=$(BuildTime)'
