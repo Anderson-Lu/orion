@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -16,12 +15,12 @@ type Logger struct {
 }
 
 type LoggerConfig struct {
-	Path              []string `yaml:"Path" json:"Path" toml:"Path"`
-	LogFileMaxSizeMB  int      `yaml:"LogFileMaxSizeMB" json:"LogFileMaxSizeMB" toml:"LogFileMaxSizeMB"`
-	LogFileMaxBackups int      `yaml:"LogFileMaxBackups" json:"LogFileMaxBackups" toml:"LogFileMaxBackups"`
-	LogMaxAgeDays     int      `yaml:"LogMaxAgeDays" json:"LogMaxAgeDays" toml:"LogMaxAgeDays"`
-	LogCompress       bool     `yaml:"LogCompress" json:"LogCompress" toml:"LogCompress"`
-	LogLevel          string   `yaml:"LogLevel" json:"LogLevel" toml:"LogLevel"`
+	Path              string `yaml:"Path" json:"Path" toml:"Path"`
+	LogFileMaxSizeMB  int    `yaml:"LogFileMaxSizeMB" json:"LogFileMaxSizeMB" toml:"LogFileMaxSizeMB"`
+	LogFileMaxBackups int    `yaml:"LogFileMaxBackups" json:"LogFileMaxBackups" toml:"LogFileMaxBackups"`
+	LogMaxAgeDays     int    `yaml:"LogMaxAgeDays" json:"LogMaxAgeDays" toml:"LogMaxAgeDays"`
+	LogCompress       bool   `yaml:"LogCompress" json:"LogCompress" toml:"LogCompress"`
+	LogLevel          string `yaml:"LogLevel" json:"LogLevel" toml:"LogLevel"`
 }
 
 func (l *LoggerConfig) check() {
@@ -43,7 +42,7 @@ func NewLogger(c *LoggerConfig) (*Logger, error) {
 
 	if c == nil {
 		c = &LoggerConfig{
-			Path: []string{"..", "log", "undefine.log"},
+			Path: "../log/unspecified.log",
 		}
 	}
 	c.check()
@@ -81,7 +80,7 @@ func NewLogger(c *LoggerConfig) (*Logger, error) {
 	encoder := zapcore.NewJSONEncoder(ec)
 
 	lj := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   filepath.Join(c.Path...),
+		Filename:   c.Path,
 		MaxSize:    c.LogFileMaxSizeMB,
 		MaxBackups: c.LogFileMaxBackups,
 		MaxAge:     c.LogMaxAgeDays,
@@ -93,10 +92,7 @@ func NewLogger(c *LoggerConfig) (*Logger, error) {
 }
 
 func (l *Logger) checkOutputPath() error {
-	if len(l.c.Path) < 1 {
-		return fmt.Errorf("invalid logger output path: %+v", l.c.Path)
-	}
-	p := filepath.Join(l.c.Path[0 : len(l.c.Path)-1]...)
+	p := filepath.Dir(l.c.Path)
 	_, err := os.Stat(p)
 	switch err {
 	case nil:

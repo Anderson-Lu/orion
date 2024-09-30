@@ -102,8 +102,8 @@ import (
 	"log"
 
 	"github.com/uit/modules/logger"
-	"github.com/uit/modules/uit"
-	_ "github.com/uit/urpcbuild"
+	"github.com/uit/urpc"
+	_ "github.com/uit/urpc/build"
 
 	"github.com/uit/example/uit_grpc_server/proto_go/proto/todo"
 	"github.com/uit/example/uit_grpc_server/service"
@@ -111,21 +111,21 @@ import (
 
 func main() {
 
-	c := &uit.Config{
-		Server:          &uit.ServerConfig{Port: 8080, EnableGRPCGateway: true},
-		PromtheusConfig: &uit.PromtheusConfig{Enable: true, Port: 9092},
-		FrameLogger:     &logger.LoggerConfig{Path: []string{"..", "log", "frame.log"}, LogLevel: "info"},
-		AccessLogger:    &logger.LoggerConfig{Path: []string{"..", "log", "access.log"}},
-		ServiceLogger:   &logger.LoggerConfig{Path: []string{"..", "log", "service.log"}},
-		PanicLogger:     &logger.LoggerConfig{Path: []string{"..", "log", "panic.log"}},
+	c := &urpc.Config{
+		Server:          &urpc.ServerConfig{Port: 8080, EnableGRPCGateway: true},
+		PromtheusConfig: &urpc.PromtheusConfig{Enable: true, Port: 9092},
+		FrameLogger:     &logger.LoggerConfig{Path: "../log/frame.log", LogLevel: "info"},
+		AccessLogger:    &logger.LoggerConfig{Path: "../log/access.log"},
+		ServiceLogger:   &logger.LoggerConfig{Path: "../log/service.log"},
+		PanicLogger:     &logger.LoggerConfig{Path: "../log/panic.log"},
 	}
 
 	handler, _ := service.NewService(c)
-	server, err := uit.New(
-    uit.WithConfigFile("../config/config.toml"),
-		uit.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),
-		uit.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint),
-		uit.WithFlags(),
+	server, err := urpc.New(
+		urpc.WithConfigFile("../config/config.toml"),
+		urpc.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),
+		urpc.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint),
+		urpc.WithFlags(),
 	)
 	if err != nil {
 		log.Fatal(err)

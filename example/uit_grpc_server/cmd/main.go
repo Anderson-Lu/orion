@@ -16,10 +16,10 @@ func main() {
 	c := &urpc.Config{
 		Server:          &urpc.ServerConfig{Port: 8080, EnableGRPCGateway: true},
 		PromtheusConfig: &urpc.PromtheusConfig{Enable: true, Port: 9092},
-		FrameLogger:     &logger.LoggerConfig{Path: []string{"..", "log", "frame.log"}, LogLevel: "info"},
-		AccessLogger:    &logger.LoggerConfig{Path: []string{"..", "log", "access.log"}},
-		ServiceLogger:   &logger.LoggerConfig{Path: []string{"..", "log", "service.log"}},
-		PanicLogger:     &logger.LoggerConfig{Path: []string{"..", "log", "panic.log"}},
+		FrameLogger:     &logger.LoggerConfig{Path: "../log/frame.log", LogLevel: "info"},
+		AccessLogger:    &logger.LoggerConfig{Path: "../log/access.log"},
+		ServiceLogger:   &logger.LoggerConfig{Path: "../log/service.log"},
+		PanicLogger:     &logger.LoggerConfig{Path: "../log/panic.log"},
 	}
 
 	handler, _ := service.NewService(c)

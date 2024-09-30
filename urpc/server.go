@@ -28,12 +28,10 @@ import (
 )
 
 var (
-	defaultFrameLogger  = &logger.LoggerConfig{Path: []string{"..", "log", "frame.log"}, LogLevel: "info"}
-	defaultAccessLogger = &logger.LoggerConfig{Path: []string{"..", "log", "access.log"}, LogLevel: "info"}
-	defaultPanicLogger  = &logger.LoggerConfig{Path: []string{"..", "log", "panic.log"}, LogLevel: "error"}
-	defaultGRPCOptions  = []grpc.DialOption{
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	}
+	defaultFrameLogger  = &logger.LoggerConfig{Path: "../log/frame.log", LogLevel: "info"}
+	defaultAccessLogger = &logger.LoggerConfig{Path: "../log/access.log", LogLevel: "info"}
+	defaultPanicLogger  = &logger.LoggerConfig{Path: "../log/panic.log", LogLevel: "error"}
+	defaultGRPCOptions  = []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 )
 
 type Server struct {
