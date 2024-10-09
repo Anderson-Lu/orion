@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package todo;
 
-option go_package = "github.com/uit/proto_go/uit/todo";
+option go_package = "github.com/orion/proto_go/uit/todo";
 
 // TodoStatus 状态
 enum TodoStatus {

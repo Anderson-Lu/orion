@@ -1,11 +1,11 @@
-package urpc
+package orpc
 
 import (
 	"context"
 	"errors"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/uit/urpc/parser"
+	"github.com/orion/orpc/parser"
 	"google.golang.org/grpc"
 )
 

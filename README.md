@@ -30,7 +30,7 @@ syntax = "proto3";
 
 package todo;
 
-option go_package = "github.com/uit/proto_go/uit/todo";
+option go_package = "github.com/orion/proto_go/uit/todo";
 
 // TodoStatus 状态
 enum TodoStatus {
@@ -101,12 +101,12 @@ package main
 import (
 	"log"
 
-	"github.com/uit/modules/logger"
-	"github.com/uit/urpc"
-	_ "github.com/uit/urpc/build"
+	"github.com/orion/pkg/logger"
+	"github.com/orion/urpc"
+	_ "github.com/orion/urpc/build"
 
-	"github.com/uit/example/uit_grpc_server/proto_go/proto/todo"
-	"github.com/uit/example/uit_grpc_server/service"
+	"github.com/orion/example/uit_grpc_server/proto_go/proto/todo"
+	"github.com/orion/example/uit_grpc_server/service"
 )
 
 func main() {
@@ -268,7 +268,7 @@ c := &uit.Config{
 
 ## 自动注入构建版本
 
-支持以Makefile方式打包二进制程序并动态注入框架版本等信息, UIT内置了`github.com/uit/urpcbuild`包,提供注入支持,当然这是可选的,或者按需自定义实现自己的build注入
+支持以Makefile方式打包二进制程序并动态注入框架版本等信息, UIT内置了`github.com/orion/urpcbuild`包,提供注入支持,当然这是可选的,或者按需自定义实现自己的build注入
 
 ```makefile
 # makefile example
@@ -280,7 +280,7 @@ BuildVersion := $(git_branch)_$(git_rev)
 BuildTime := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
 BuildCommit := $(shell git rev-parse --short HEAD)
 BuildGoVersion := $(shell go version)
-BuilderPkg := "github.com/uit/urpcbuild"
+BuilderPkg := "github.com/orion/urpcbuild"
 
 GOLDFLAGS =  -X '$(BuilderPkg).BuildVersion=$(BuildVersion)'
 GOLDFLAGS += -X '$(BuilderPkg).BuildTime=$(BuildTime)'
@@ -337,7 +337,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/uit/modules/utils/ticker_cache"
+	"github.com/orion/pkg/utils/ticker_cache"
 )
 
 func main() {

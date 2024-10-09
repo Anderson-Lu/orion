@@ -1,12 +1,12 @@
 package service
 
 import (
-	"github.com/uit/example/uit_grpc_server/proto_go/proto/todo"
-	"github.com/uit/modules/logger"
-	"github.com/uit/urpc"
+	"github.com/orion/example/uit_grpc_server/proto_go/proto/todo"
+	"github.com/orion/orpc"
+	"github.com/orion/pkg/logger"
 )
 
-func NewService(c *urpc.Config) (*Service, error) {
+func NewService(c *orpc.Config) (*Service, error) {
 
 	lg, err := logger.NewLogger(c.ServiceLogger)
 	if err != nil {
@@ -20,7 +20,7 @@ func NewService(c *urpc.Config) (*Service, error) {
 }
 
 type Service struct {
-	c *urpc.Config
+	c *orpc.Config
 	l *logger.Logger
 	todo.UnimplementedUitTodoServer
 }

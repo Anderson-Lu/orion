@@ -3,8 +3,8 @@ package interceptors
 import (
 	"context"
 
-	"github.com/uit/modules/logger"
-	"github.com/uit/urpc/xcontext"
+	"github.com/orion/orpc/xcontext"
+	"github.com/orion/pkg/logger"
 	"google.golang.org/grpc"
 )
 

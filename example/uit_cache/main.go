@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/uit/modules/cache"
+	"github.com/orion/pkg/cache"
 )
 
 func main() {

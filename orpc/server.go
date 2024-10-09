@@ -1,4 +1,4 @@
-package urpc
+package orpc
 
 import (
 	"context"
@@ -9,9 +9,9 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/uit/modules/logger"
-	"github.com/uit/urpc/build"
-	"github.com/uit/urpc/interceptors"
+	"github.com/orion/orpc/build"
+	"github.com/orion/orpc/interceptors"
+	"github.com/orion/pkg/logger"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

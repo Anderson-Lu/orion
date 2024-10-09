@@ -1,6 +1,6 @@
-package urpc
+package orpc
 
-import "github.com/uit/modules/logger"
+import "github.com/orion/pkg/logger"
 
 type ServerConfig struct {
 	Port              uint32 `default:"8081" yaml:"Port" json:"Port" toml:"Port"`
