@@ -22,7 +22,7 @@ import (
   "fmt"
   "time"
 
-  "github.com/orion/pkg/utils/ticker_cache"
+  "github.com/Anderson-Lu/orion/pkg/utils/ticker_cache"
 )
 
 func main() {

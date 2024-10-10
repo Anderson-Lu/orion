@@ -1,6 +1,6 @@
 package config
 
-import "github.com/orion/orpc"
+import "github.com/Anderson-Lu/orion/orpc"
 
 type Config struct {
 	orpc.Config

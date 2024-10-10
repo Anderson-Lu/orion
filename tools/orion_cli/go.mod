@@ -1,4 +1,4 @@
-module github.com/orion/tools/orion-cli
+module github.com/Anderson-Lu/orion/tools/orion-cli
 
 go 1.22.1
 

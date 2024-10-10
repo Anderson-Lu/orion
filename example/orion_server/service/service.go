@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/orion/example/orion_server/config"
-	"github.com/orion/example/orion_server/proto_go/proto/todo"
-	"github.com/orion/pkg/logger"
+	"github.com/Anderson-Lu/orion/example/orion_server/config"
+	"github.com/Anderson-Lu/orion/example/orion_server/proto_go/proto/todo"
+	"github.com/Anderson-Lu/orion/pkg/logger"
 )
 
 func NewService(c *config.Config) (*Service, error) {
