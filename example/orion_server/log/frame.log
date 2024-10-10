@@ -1,0 +1,108 @@
+{"level":"info","time":"2024-09-20T15:17:36.767+0800","caller":"logger/logger.go:134","message":"[Server]","EvType":1,"Ev":"[Server] http server stared on: 8080"}
+{"level":"info","time":"2024-09-20T15:17:36.767+0800","caller":"logger/logger.go:134","message":"[Server]","EvType":1,"Ev":"[Server] gRPC server stared on: 8081"}
+{"level":"info","time":"2024-09-20T15:18:26.980+0800","caller":"logger/logger.go:134","message":"register grpc router succ","desc":"todo.UitTodo"}
+{"level":"info","time":"2024-09-20T15:18:26.981+0800","caller":"logger/logger.go:134","message":"[Server]","EvType":1,"Ev":"[Server] http server stared on: 8080"}
+{"level":"info","time":"2024-09-20T15:18:26.981+0800","caller":"logger/logger.go:134","message":"[Server]","EvType":1,"Ev":"[Server] gRPC server stared on: 8081"}
+{"level":"info","time":"2024-09-20T15:23:06.166+0800","caller":"logger/logger.go:134","message":"[Server] register grpc router succ","desc":"todo.UitTodo"}
+{"level":"info","time":"2024-09-20T15:23:06.166+0800","caller":"logger/logger.go:134","message":"[Server] http server started succ","port":8080}
+{"level":"debug","time":"2024-09-20T15:23:06.166+0800","caller":"logger/logger.go:130","message":"[Server]","EvType":1,"Ev":"[Server] http server stared on: 8080"}
+{"level":"info","time":"2024-09-20T15:23:06.166+0800","caller":"logger/logger.go:134","message":"[Server] gRPC server started succ","port":8081}
+{"level":"debug","time":"2024-09-20T15:23:06.166+0800","caller":"logger/logger.go:130","message":"[Server]","EvType":1,"Ev":"[Server] gRPC server stared on: 8081"}
+{"level":"info","time":"2024-09-20T15:23:55.155+0800","caller":"logger/logger.go:134","message":"[Server] register grpc router succ","desc":"todo.UitTodo"}
+{"level":"info","time":"2024-09-20T15:23:55.155+0800","caller":"logger/logger.go:134","message":"[Server] http server started succ","port":8080}
+{"level":"info","time":"2024-09-20T15:23:55.155+0800","caller":"logger/logger.go:134","message":"[Server] gRPC server started succ","port":8081}
+{"level":"info","time":"2024-09-20T15:34:53.357+0800","caller":"logger/logger.go:134","message":"[Server] http server started succ","port":8080}
+{"level":"info","time":"2024-09-20T15:34:53.357+0800","caller":"logger/logger.go:134","message":"[Server] gRPC server started succ","port":8081}
+{"level":"info","time":"2024-09-20T15:36:16.739+0800","caller":"logger/logger.go:134","message":"[Server] gRPC router registed","desc":"todo.UitTodo"}
+{"level":"info","time":"2024-09-20T15:36:16.739+0800","caller":"logger/logger.go:134","message":"[Server] http server started succ","port":8080}
+{"level":"info","time":"2024-09-20T15:36:16.739+0800","caller":"logger/logger.go:134","message":"[Server] gRPC server started succ","port":8081}
+{"level":"info","time":"2024-09-20T15:40:42.287+0800","caller":"xgrpc/server.go:147","message":"[Server] gRPC router registed","desc":"todo.UitTodo"}
+{"level":"info","time":"2024-09-20T15:40:42.287+0800","caller":"xgrpc/server.go:115","message":"[Server] http server started succ","port":8080}
+{"level":"info","time":"2024-09-20T15:40:42.287+0800","caller":"xgrpc/server.go:125","message":"[Server] gRPC server started succ","port":8081}
+{"level":"info","time":"2024-09-23T20:05:05.291+0800","caller":"xgrpc/server.go:147","message":"[Server] gRPC router registed","desc":"todo.UitTodo"}
+{"level":"info","time":"2024-09-23T20:05:05.291+0800","caller":"xgrpc/server.go:115","message":"[Server] http server started succ","port":8080}
+{"level":"info","time":"2024-09-23T20:05:05.291+0800","caller":"xgrpc/server.go:125","message":"[Server] gRPC server started succ","port":8081}
+{"level":"info","time":"2024-09-23T20:08:00.456+0800","caller":"xgrpc/server.go:147","message":"[Server] gRPC router registed","desc":"todo.UitTodo"}
+{"level":"info","time":"2024-09-23T20:08:00.456+0800","caller":"xgrpc/server.go:115","message":"[Server] http server started succ","port":8080}
+{"level":"info","time":"2024-09-23T20:08:00.456+0800","caller":"xgrpc/server.go:125","message":"[Server] gRPC server started succ","port":8081}
+{"level":"info","time":"2024-09-27T15:53:32.924+0800","caller":"xgrpc/server.go:180","message":"[Server] gRPC server started succ","port":8081}
+{"level":"info","time":"2024-09-27T15:53:32.924+0800","caller":"xgrpc/server.go:171","message":"[Server] http server started succ","port":8080}
+{"level":"info","time":"2024-09-27T16:05:46.223+0800","caller":"xgrpc/server.go:171","message":"[Server] http server started succ","port":8080}
+{"level":"info","time":"2024-09-27T16:05:46.223+0800","caller":"xgrpc/server.go:180","message":"[Server] gRPC server started succ","port":8081}
+{"level":"info","time":"2024-09-27T16:08:49.967+0800","caller":"xgrpc/server.go:169","message":"[Server] http server started succ","port":8080}
+{"level":"info","time":"2024-09-27T16:08:49.967+0800","caller":"xgrpc/server.go:178","message":"[Server] gRPC server started succ","port":8081}
+{"level":"info","time":"2024-09-27T16:09:48.826+0800","caller":"xgrpc/server.go:178","message":"[Server] gRPC server started succ","port":8081}
+{"level":"info","time":"2024-09-27T16:09:48.826+0800","caller":"xgrpc/server.go:159","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-27T16:09:48.826+0800","caller":"xgrpc/server.go:169","message":"[Server] http server started succ","port":8080}
+{"level":"info","time":"2024-09-27T16:46:04.272+0800","caller":"xgrpc/server.go:177","message":"[Server] gRPC server started succ","port":8081}
+{"level":"info","time":"2024-09-27T16:46:04.272+0800","caller":"xgrpc/server.go:168","message":"[Server] http server started succ","port":8080}
+{"level":"info","time":"2024-09-27T16:46:04.272+0800","caller":"xgrpc/server.go:158","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:39:18.034+0800","caller":"xgrpc/server.go:172","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:39:18.034+0800","caller":"xgrpc/server.go:162","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:40:15.866+0800","caller":"xgrpc/server.go:162","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:40:15.866+0800","caller":"xgrpc/server.go:172","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:40:57.052+0800","caller":"xgrpc/server.go:173","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:40:57.052+0800","caller":"xgrpc/server.go:163","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:41:39.648+0800","caller":"xgrpc/server.go:163","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:41:39.648+0800","caller":"xgrpc/server.go:173","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:42:11.464+0800","caller":"xgrpc/server.go:163","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:42:11.464+0800","caller":"xgrpc/server.go:173","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:42:51.249+0800","caller":"xgrpc/server.go:174","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:42:51.249+0800","caller":"xgrpc/server.go:164","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:44:06.908+0800","caller":"xgrpc/server.go:164","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:44:06.908+0800","caller":"xgrpc/server.go:174","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:44:46.570+0800","caller":"xgrpc/server.go:164","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:44:46.570+0800","caller":"xgrpc/server.go:174","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:45:26.347+0800","caller":"xgrpc/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:45:26.347+0800","caller":"xgrpc/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:45:37.033+0800","caller":"xgrpc/server.go:176","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:45:37.033+0800","caller":"xgrpc/server.go:166","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:46:07.249+0800","caller":"xgrpc/server.go:166","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:46:07.249+0800","caller":"xgrpc/server.go:176","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:46:25.864+0800","caller":"xgrpc/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:46:25.864+0800","caller":"xgrpc/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:50:25.790+0800","caller":"xgrpc/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:50:25.790+0800","caller":"xgrpc/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:52:07.092+0800","caller":"xgrpc/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:52:07.092+0800","caller":"xgrpc/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:52:20.052+0800","caller":"xgrpc/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:52:20.052+0800","caller":"xgrpc/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:53:40.511+0800","caller":"xgrpc/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T10:53:40.511+0800","caller":"xgrpc/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:58:39.841+0800","caller":"xgrpc/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T10:58:39.841+0800","caller":"xgrpc/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T11:19:06.707+0800","caller":"uit/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T11:19:06.707+0800","caller":"uit/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T14:30:56.942+0800","caller":"uit/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T14:30:56.942+0800","caller":"uit/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T14:30:56.942+0800","caller":"uit/server.go:179","message":"[Server] gRPC server started fail","port":8080,"err":"listen tcp :8080: bind: address already in use"}
+{"level":"info","time":"2024-09-29T14:30:56.942+0800","caller":"uit/server.go:167","message":"[Server] promtheus metrics server started fail","port":9092,"err":"listen tcp :9092: bind: address already in use"}
+{"level":"info","time":"2024-09-29T14:31:02.096+0800","caller":"uit/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T14:31:02.096+0800","caller":"uit/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T14:31:38.519+0800","caller":"uit/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T14:31:38.519+0800","caller":"uit/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T14:33:33.484+0800","caller":"uit/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T14:33:33.484+0800","caller":"uit/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T14:37:35.525+0800","caller":"uit/server.go:167","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T14:37:35.525+0800","caller":"uit/server.go:177","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T14:37:56.706+0800","caller":"uit/server.go:177","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T14:37:56.706+0800","caller":"uit/server.go:167","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T14:39:15.329+0800","caller":"uit/server.go:167","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T14:39:15.329+0800","caller":"uit/server.go:177","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T14:41:02.067+0800","caller":"uit/server.go:177","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T14:41:02.067+0800","caller":"uit/server.go:167","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T15:11:32.384+0800","caller":"uit/server.go:177","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T15:11:32.384+0800","caller":"uit/server.go:167","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T15:14:00.185+0800","caller":"uit/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T15:14:00.185+0800","caller":"uit/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T15:16:48.368+0800","caller":"uit/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T15:16:48.368+0800","caller":"uit/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T16:12:46.173+0800","caller":"uit/server.go:165","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T16:12:46.173+0800","caller":"uit/server.go:175","message":"[Server] gRPC server started succ","port":8080}
+{"level":"info","time":"2024-09-29T17:07:41.771+0800","caller":"uit/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T17:26:13.582+0800","caller":"uit/server.go:177","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T17:26:34.019+0800","caller":"uit/server.go:177","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T17:26:45.871+0800","caller":"uit/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T17:26:56.240+0800","caller":"uit/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T17:27:39.818+0800","caller":"uit/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-09-29T17:28:41.328+0800","caller":"uit/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}

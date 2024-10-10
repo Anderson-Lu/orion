@@ -1,0 +1,20 @@
+Server:
+  Port: 8080
+  EnableGRPCGateway: true
+
+PromtheusConfig:
+  Enable: true
+  Port: 9092
+
+FrameLogger:
+  Path: '../log/frame.log'
+  LogLevel: 'info'
+
+AccessLogger:
+  Path: '../log/access.log'
+
+PanicLogger:
+  Path: '../log/panic.log'
+
+ServiceLogger:
+  Path: '../log/service.log'
