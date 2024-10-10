@@ -7,14 +7,14 @@ PromtheusConfig:
   Port: 9092
 
 FrameLogger:
-  Path: ['..','log','frame.log']
+  Path: '../log/frame.log'
   LogLevel: 'info'
 
 AccessLogger:
-  Path: ['..','log','access.log']
+  Path: '../log/access.log'
 
 PanicLogger:
-  Path: ['..','log','panic.log']
+  Path: '../log/panic.log'
 
 ServiceLogger:
-  Path: ['..','log','service.log']
+  Path: '../log/service.log'
