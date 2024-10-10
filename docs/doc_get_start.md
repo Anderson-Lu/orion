@@ -9,7 +9,7 @@ syntax = "proto3";
 
 package todo;
 
-option go_package = "github.com/orion/proto_go/uit/todo";
+option go_package = "github.com/Anderson-Lu/orion/proto_go/uit/todo";
 
 // TodoStatus 状态
 enum TodoStatus {
@@ -80,19 +80,19 @@ package main
 import (
   "log"
 
-  "github.com/orion/pkg/logger"
-  "github.com/orion/urpc"
-  _ "github.com/orion/urpc/build"
+  "github.com/Anderson-Lu/orion/pkg/logger"
+  "github.com/Anderson-Lu/orion/orpc"
+  _ "github.com/Anderson-Lu/orion/orpc/build"
 
-  "github.com/orion/example/orion_server/proto_go/proto/todo"
-  "github.com/orion/example/orion_server/service"
+  "github.com/Anderson-Lu/orion/example/orion_server/proto_go/proto/todo"
+  "github.com/Anderson-Lu/orion/example/orion_server/service"
 )
 
 func main() {
 
   c := &urpc.Config{
-    Server:          &urpc.ServerConfig{Port: 8080, EnableGRPCGateway: true},
-    PromtheusConfig: &urpc.PromtheusConfig{Enable: true, Port: 9092},
+    Server:          &orpc.ServerConfig{Port: 8080, EnableGRPCGateway: true},
+    PromtheusConfig: &orpc.PromtheusConfig{Enable: true, Port: 9092},
     FrameLogger:     &logger.LoggerConfig{Path: "../log/frame.log", LogLevel: "info"},
     AccessLogger:    &logger.LoggerConfig{Path: "../log/access.log"},
     ServiceLogger:   &logger.LoggerConfig{Path: "../log/service.log"},

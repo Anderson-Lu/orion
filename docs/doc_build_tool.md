@@ -1,7 +1,7 @@
 
 # 自动注入构建版本
 
-支持以Makefile方式打包二进制程序并动态注入框架版本等信息, UIT内置了`github.com/orion/urpcbuild`包,提供注入支持,当然这是可选的,或者按需自定义实现自己的build注入
+支持以Makefile方式打包二进制程序并动态注入框架版本等信息, UIT内置了`github.com/Anderson-Lu/orion/orpc/build`包,提供注入支持,当然这是可选的,或者按需自定义实现自己的build注入
 
 ```makefile
 # makefile example
@@ -13,7 +13,7 @@ BuildVersion := $(git_branch)_$(git_rev)
 BuildTime := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
 BuildCommit := $(shell git rev-parse --short HEAD)
 BuildGoVersion := $(shell go version)
-BuilderPkg := "github.com/orion/urpcbuild"
+BuilderPkg := "github.com/Anderson-Lu/orion/orpc/build"
 
 GOLDFLAGS =  -X '$(BuilderPkg).BuildVersion=$(BuildVersion)'
 GOLDFLAGS += -X '$(BuilderPkg).BuildTime=$(BuildTime)'
