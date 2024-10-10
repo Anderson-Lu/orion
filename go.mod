@@ -1,8 +1,6 @@
 module github.com/Anderson-Lu/orion
 
-go 1.21
-
-toolchain go1.22.1
+go 1.22.1
 
 require (
 	github.com/BurntSushi/toml v1.4.0
@@ -35,3 +33,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )
+
+replace github.com/Anderson-Lu/orion/tools/orion-cli => ./tools/orion-cli
