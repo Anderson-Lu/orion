@@ -16,7 +16,7 @@
 
 ## 快速开始
 
-[快速开始](./docs/doc_get_start.md) | [配置说明](./docs/doc_config.md)
+[快速开始](./docs/doc_get_start.md) | [配置说明](./docs/doc_config.md) | [Orion-Cli](./docs/doc_cli.md)
 
 
 ## 服务发现和注册
