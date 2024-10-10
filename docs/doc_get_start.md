@@ -84,8 +84,8 @@ import (
   "github.com/orion/urpc"
   _ "github.com/orion/urpc/build"
 
-  "github.com/orion/example/uit_grpc_server/proto_go/proto/todo"
-  "github.com/orion/example/uit_grpc_server/service"
+  "github.com/orion/example/orion_server/proto_go/proto/todo"
+  "github.com/orion/example/orion_server/service"
 )
 
 func main() {

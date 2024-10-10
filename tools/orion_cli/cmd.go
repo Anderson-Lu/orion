@@ -44,7 +44,7 @@ func handleCmd(c func() error) {
 		return
 	}
 
-	cl.Log("Excute succ!")
+	cl.Log("Excute succ! please run `go mod tidy` to fix reference issues")
 }
 
 func init() {
