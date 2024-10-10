@@ -10,7 +10,7 @@ server, err := orpc.New(
 )
 ```
 
-配置项举例:
+配置项举例(yaml):
 
 ```yaml
 Server:
@@ -35,6 +35,10 @@ ServiceLogger:
   Path: '../log/service.log'
 ```
 
+更多配置模版:
+
+[JSON格式配置](../example/uit_grpc_server/config/config.json) | [TOML格式配置](../example/uit_grpc_server/config/config.toml) | [YAML格式配置](../example/uit_grpc_server/config/config.yaml)
+
 其中日志可选配置项:
 
 ```bash
@@ -45,3 +49,5 @@ LogMaxAgeDays # 最长保留天数
 LogCompress  # 是否压缩(gzip)
 LogLevel # 日志等级
 ```
+
+**Orion**日志基于开源的`zaplog`和`lumberjack`组件进行二次组合封装.
