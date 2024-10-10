@@ -3,8 +3,11 @@
 # 安装
 
 ```bash
-
+go get github.com/Anderson-Lu/orion/tools/orion-cli
+go build github.com/Anderson-Lu/orion/tools/orion-cli
 ```
+
+这样就可以在`$GOPATH/bin`目录下看到`orion-cli`了
 
 # 通过CLI创建项目模版(new)
 
