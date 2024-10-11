@@ -24,7 +24,8 @@ var cmd = &cobra.Command{
 
 var cmdGenerator = &cobra.Command{
 	Use:     "new",
-	Example: "orion-cli new folder_name",
+	Short:   "\norion-cli new\ncreate a new project",
+	Example: " [*] orion-cli new [OutputPath] [ModuleName]\n eg: orion-cli new my-demo github.com/demo",
 	Run: func(cmd *cobra.Command, args []string) {
 		handleCmd(func() error {
 			gen := &OrionGenerator{}
