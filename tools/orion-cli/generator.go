@@ -114,19 +114,11 @@ package main
 import (
 	"log"
 
-<<<<<<< HEAD
-	"github.com/orion/orpc"
-	_ "github.com/orion/orpc/build"
-	"github.com/orion/pkg/logger"
-
-	// "github.com/orion/example/orion_server/proto_go/proto/todo"
-=======
 	"github.com/Anderson-Lu/orion/orpc"
 	_ "github.com/Anderson-Lu/orion/orpc/build"
 	"github.com/Anderson-Lu/orion/pkg/logger"
 
 	// "github.com/Anderson-Lu/orion/example/orion_server/proto_go/proto/todo"
->>>>>>> dev_0_0_2
 	"${module}/service"
 )
 
@@ -165,11 +157,7 @@ package service
 
 import (
 	"${module}/config"
-<<<<<<< HEAD
-	"github.com/orion/pkg/logger"
-=======
 	"github.com/Anderson-Lu/orion/pkg/logger"
->>>>>>> dev_0_0_2
 )
 
 func NewService(c *config.Config) (*Service, error) {
@@ -194,11 +182,7 @@ type Service struct {
 	_tpl_config = `
 package config
 
-<<<<<<< HEAD
-import "github.com/orion/orpc"
-=======
 import "github.com/Anderson-Lu/orion/orpc"
->>>>>>> dev_0_0_2
 
 type Config struct {
 	orpc.Config
