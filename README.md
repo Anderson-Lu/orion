@@ -16,7 +16,7 @@
 
 ## 快速开始
 
-[快速开始](./docs/doc_get_start.md) | [配置说明](./docs/doc_config.md) | [Orion-Cli](./docs/doc_cli.md)
+[快速开始](./docs/doc_get_start.md) | [配置说明](./docs/doc_config.md) | [Orion-Cli脚手架](./docs/doc_cli.md) | [Orion GRPC Client](./docs/doc_orion_client.md)
 
 
 ## 服务发现和注册

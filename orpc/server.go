@@ -22,6 +22,8 @@ import (
 
 	_ "runtime/pprof"
 
+	_ "github.com/Anderson-Lu/orion/orpc/codec"
+
 	_ "go.uber.org/automaxprocs"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"

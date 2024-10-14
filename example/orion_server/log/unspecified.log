@@ -1,0 +1,8 @@
+{"level":"debug","time":"2024-10-14T13:53:43.163+0800","caller":"service/todo_add.go:10","message":"invoke","in":"item:{id:\"1\"}"}
+{"level":"debug","time":"2024-10-14T13:57:09.525+0800","caller":"service/todo_add.go:10","message":"invoke","in":"item:{id:\"1\"}"}
+{"level":"debug","time":"2024-10-14T13:57:20.668+0800","caller":"service/todo_add.go:10","message":"invoke","in":"item:{id:\"1\"}"}
+{"level":"debug","time":"2024-10-14T13:57:23.884+0800","caller":"service/todo_add.go:10","message":"invoke","in":"item:{id:\"1\"}"}
+{"level":"debug","time":"2024-10-14T14:02:59.613+0800","caller":"service/todo_add.go:10","message":"invoke","in":"item:{id:\"1\"}"}
+{"level":"debug","time":"2024-10-14T16:04:23.673+0800","caller":"service/todo_add.go:10","message":"invoke","in":"item:{id:\"1\"}"}
+{"level":"debug","time":"2024-10-14T16:05:00.813+0800","caller":"service/todo_add.go:10","message":"invoke","in":"item:{id:\"1\"}"}
+{"level":"debug","time":"2024-10-14T16:07:54.401+0800","caller":"service/todo_add.go:10","message":"invoke","in":"item:{id:\"1\"}"}
