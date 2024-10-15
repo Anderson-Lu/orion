@@ -3,8 +3,11 @@ package client
 import (
 	"context"
 	"errors"
+	"time"
 
+	"github.com/Anderson-Lu/orion/orpc/codes"
 	"github.com/Anderson-Lu/orion/pkg/balancer"
+	"github.com/Anderson-Lu/orion/pkg/circuit_break"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -14,6 +17,7 @@ var (
 		DailTimeout:   1000,
 		ConnectionNum: 1,
 	}
+	_OrionReqBeginTimeKey = struct{}{}
 )
 
 type OrionClientConfig struct {
@@ -29,6 +33,9 @@ type OrionClientConfig struct {
 	// can be set to "random" or "hash", if not set, random balancer will be set by default.
 	// it only works when ConnectionNum > 0
 	ConnectionBalancer string
+
+	// if set, circuit breaker will be set
+	CircuitBreakRules []*circuit_break.RuleConfig
 }
 
 func New(c *OrionClientConfig) (*OrionClient, error) {
@@ -50,14 +57,26 @@ func New(c *OrionClientConfig) (*OrionClient, error) {
 		}
 		cli.conns = append(cli.conns, c)
 	}
+	cli.initCircuitBreaker()
 
 	return cli, nil
 }
 
 type OrionClient struct {
-	b     balancer.Balancer
-	c     *OrionClientConfig
-	conns []grpc.ClientConnInterface
+	b       balancer.Balancer
+	c       *OrionClientConfig
+	conns   []grpc.ClientConnInterface
+	breaker *circuit_break.CircuitBreaker
+}
+
+func (o *OrionClient) initCircuitBreaker() {
+	if len(o.c.CircuitBreakRules) <= 0 {
+		return
+	}
+	o.breaker = circuit_break.NewCircuitBreaker()
+	for _, rule := range o.c.CircuitBreakRules {
+		o.breaker.Register(rule)
+	}
 }
 
 func (o *OrionClient) initBalancer() {
@@ -83,8 +102,61 @@ func (o *OrionClient) Invoke(ctx context.Context, method string, req, rsp interf
 	}
 	bIdx := o.b.Get(o.balanceOptions(opts...))
 	defer o.b.Update(bIdx)
+
+	ctx, err := o.beforeInvoke(ctx, method, req, rsp, opts...)
+	if err != nil {
+		return o.afterInvoke(ctx, method, req, rsp, err, opts...)
+	}
+
 	options := o.buildOptions(opts...)
-	return o.conns[bIdx].Invoke(ctx, method, req, rsp, options...)
+	err = o.conns[bIdx].Invoke(ctx, method, req, rsp, options...)
+	return o.afterInvoke(ctx, method, req, rsp, err, opts...)
+}
+
+func (o *OrionClient) beforeInvoke(ctx context.Context, method string, req, rsp interface{}, opts ...OrionClientInvokeOption) (context.Context, error) {
+
+	ctx = context.WithValue(ctx, _OrionReqBeginTimeKey, time.Now().UnixMilli())
+
+	needCheckCircuit := false
+	for _, v := range opts {
+		if v.Type() == OptionTypeCircuitBreakOption {
+			needCheckCircuit = true
+		}
+	}
+
+	if needCheckCircuit && o.breaker != nil {
+		if canPass := o.breaker.Pass(method); !canPass {
+			return ctx, codes.WrapCodeFromError(errors.New("circuit break"), codes.ErrCodeCircuitBreak)
+		}
+	}
+
+	return ctx, nil
+}
+
+func (o *OrionClient) afterInvoke(ctx context.Context, method string, req, rsp interface{}, err error, opts ...OrionClientInvokeOption) error {
+
+	needCheckCircuit := false
+	for _, v := range opts {
+		if v.Type() == OptionTypeCircuitBreakOption {
+			needCheckCircuit = true
+		}
+	}
+
+	reqCost := o.cost(ctx)
+
+	if needCheckCircuit && o.breaker != nil && codes.GetCodeFromError(err) != codes.ErrCodeCircuitBreak {
+		o.breaker.Report(method, err == nil, int64(reqCost))
+	}
+
+	return err
+}
+
+func (o *OrionClient) cost(ctx context.Context) int64 {
+	begin := ctx.Value(_OrionReqBeginTimeKey)
+	if begin, ok := begin.(int64); ok {
+		return (time.Now().UnixMilli() - begin)
+	}
+	return 0.0
 }
 
 func (o *OrionClient) balanceOptions(opts ...OrionClientInvokeOption) string {

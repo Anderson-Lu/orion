@@ -8,8 +8,9 @@ import (
 type OptionType int
 
 const (
-	OptionTypeGrpcCallOption OptionType = 1
-	OptionTypeBalanceOption  OptionType = 2
+	OptionTypeGrpcCallOption     OptionType = 1
+	OptionTypeBalanceOption      OptionType = 2
+	OptionTypeCircuitBreakOption OptionType = 3
 )
 
 type OrionClientInvokeOption interface {
@@ -50,4 +51,20 @@ func (c CallOptionWithJson) Params() []interface{} {
 
 func (c CallOptionWithJson) Type() OptionType {
 	return OptionTypeGrpcCallOption
+}
+
+func WithCircuitBreak(methods ...string) OrionClientInvokeOption {
+	return &CircuitBreakerOption{methods: methods}
+}
+
+type CircuitBreakerOption struct {
+	methods []string
+}
+
+func (c CircuitBreakerOption) Params() []interface{} {
+	return []interface{}{c.methods}
+}
+
+func (c CircuitBreakerOption) Type() OptionType {
+	return OptionTypeCircuitBreakOption
 }

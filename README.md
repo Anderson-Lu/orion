@@ -25,16 +25,17 @@
 
 当然uit框架在未来也可能会提供注册和发现的相关组件.
 
-## 限流熔断
+## 限流
 
 在传统微服务架构中,接口的限流一般是在被调进行的. 但随着新一代微服务架构的演变,一些限流能力通常会沉淀到sidecar(将其从框架本身移除,能做到更好的非业务侵入),通过`service mesh`等控制面统一下发和控制流量的方式为微服务提供高可用保证.然而,为了提供更多的便捷性,UIT框架本身也支持限流组件,不强制接入使用,也可以业务自己引用.
 
 ## 错误码
 
-UIT框架内置了一些错误码,原则上业务使用的错误码应当与框架的错误码区分开,详细信息可以参照`uit/pkg/uit/codes/codes.go`.
+Orion框架内置了一些错误码,原则上业务使用的错误码应当与框架的错误码区分开,详细信息可以参照`uit/pkg/uit/codes/codes.go`.
 
 ## Orion优雅编程
 
 - [本地缓存TickerCache](./docs/doc_ticker_cache.md)
 - [自动注入构建版本](./docs/doc_build_tool.md)
 - [容器部署优化](./docs/doc_docker.md)
+- [熔断器](./docs/doc_circuit_breaker.md)

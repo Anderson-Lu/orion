@@ -4,10 +4,10 @@
 import "github.com/Anderson-Lu/orion/orpc/client"
 
 cli, err := client.New(&client.OrionClientConfig{
-	Host:               "127.0.0.1:8080",
-	DailTimeout:        3000,
-	ConnectionNum:      1,
-	ConnectionBalancer: "random",
+  Host:               "127.0.0.1:8080",
+  DailTimeout:        3000,
+  ConnectionNum:      1,
+  ConnectionBalancer: "random",
 })
 ```
 
@@ -32,7 +32,7 @@ import "github.com/Anderson-Lu/orion/orpc/client"
 // ...
 
 if err := cli.Invoke(ctx, "your method desc", req, rsp, client.WithJson()); err != nil {
-	// TODO
+  // TODO
     // add your logic
 }
 ```
@@ -68,3 +68,40 @@ if err := cli.Invoke(ctx, "/todo.UitTodo/Add", req, rsp, client.WithHash("uid"))
 ```
 
 注意, 当前的**Balancer**只吃对**本地**GRPC长链接对象的均衡分发策略, 非被调端的负载均衡.一般情况下,只需要维持一个长链接即可满足普通的业务需求.
+
+# 主调侧熔断器
+
+依赖[熔断组件](./doc_circuit_breaker.md), Orion框架内部集成熔断策略. 只需要在创建客户端时指定对应的选项即可.
+
+```go
+// 客户端选项
+opts := []client.OrionClientInvokeOption{
+  client.WithJson(),
+  client.WithHash("uid"),
+  client.WithCircuitBreak("/todo.UitTodo/Add"), // 这里指定要进行熔断的接口
+}
+
+// 创建客户端
+cli, err := client.New(&client.OrionClientConfig{
+  Host:               "127.0.0.1:8080",
+  DailTimeout:        3000,
+  ConnectionNum:      1,
+  ConnectionBalancer: "json",
+  CircuitBreakRules: []*circuit_break.RuleConfig{
+    {
+      Name:             "/todo.UitTodo/Add",
+      Window:           &circuit_break.WindowConfig{},
+      OpenDuration:     1000,
+      HalfOpenDuration: 100,
+      HaflOpenPassRate: 0,
+      RuleExpression:   "req_count >= 1 && succ_rate < 0.90",
+    },
+  },
+})
+
+// 调用
+err := cli.Invoke(context.Background(), "/todo.UitTodo/Add", req, rsp, opts...)
+
+// 判断是否被熔断了(3001)
+isCircuitError := codes.GetCodeFromError(err) == codes.ErrCodeCircuitBreak
+```

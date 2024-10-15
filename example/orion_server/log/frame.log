@@ -108,3 +108,11 @@
 {"level":"info","time":"2024-09-29T17:28:41.328+0800","caller":"uit/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
 {"level":"info","time":"2024-10-14T10:37:39.849+0800","caller":"orpc/server.go:173","message":"[Server] promtheus metrics server started succ","port":9092}
 {"level":"info","time":"2024-10-14T13:56:47.877+0800","caller":"orpc/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-10-15T20:05:13.133+0800","caller":"orpc/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-10-15T20:15:44.039+0800","caller":"orpc/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-10-15T20:17:23.963+0800","caller":"orpc/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-10-15T20:17:56.762+0800","caller":"orpc/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-10-15T20:21:53.561+0800","caller":"orpc/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-10-15T20:23:46.504+0800","caller":"orpc/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-10-15T20:25:14.182+0800","caller":"orpc/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
+{"level":"info","time":"2024-10-15T20:27:43.188+0800","caller":"orpc/server.go:175","message":"[Server] promtheus metrics server started succ","port":9092}
