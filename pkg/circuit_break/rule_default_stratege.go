@@ -8,8 +8,11 @@ import (
 
 func NewDefaultRuleStratege(exprString string, openDuration, halfDuration, halfPassRate int64) *RuleDefaultStratege {
 	r := &RuleDefaultStratege{
-		ast:      &CircuitRuleAst{ruleString: exprString},
-		halfRand: rand.New(rand.NewSource(time.Now().UnixMicro())),
+		ast:          &CircuitRuleAst{ruleString: exprString},
+		halfRand:     rand.New(rand.NewSource(time.Now().UnixMicro())),
+		halfDuration: halfDuration,
+		halfPassRate: halfPassRate,
+		openDuration: openDuration,
 	}
 	r.ast.parse(nil)
 	return r

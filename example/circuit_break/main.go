@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+
 	rc := &circuit_break.RuleConfig{
 		Name: "rule1",
 		Window: &circuit_break.WindowConfig{

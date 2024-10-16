@@ -13,16 +13,16 @@ func main() {
 
 	cli, err := client.New(&client.OrionClientConfig{
 		Host:               "127.0.0.1:8080",
-		DailTimeout:        3000,
+		DailTimeout:        10000,
 		ConnectionNum:      1,
 		ConnectionBalancer: "json",
 		CircuitBreakRules: []*circuit_break.RuleConfig{
 			{
 				Name:             "/todo.UitTodo/Add",
 				Window:           &circuit_break.WindowConfig{},
-				OpenDuration:     1000,
-				HalfOpenDuration: 100,
-				HaflOpenPassRate: 0,
+				OpenDuration:     10000,
+				HalfOpenDuration: 3000,
+				HaflOpenPassRate: 50,
 				RuleExpression:   "req_count >= 1 && succ_rate < 0.90",
 			},
 		},
