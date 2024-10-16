@@ -18,3 +18,8 @@ Path = "../log/panic.log"
 
 [ServiceLogger]
 Path = "../log/service.log"
+
+[[RateLimit]]
+Key = "/todo.UitTodo/Add"
+Cap = 1
+TokensPerSecond = 1

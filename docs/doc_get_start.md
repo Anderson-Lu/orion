@@ -186,3 +186,32 @@ grpcurl -plaintext 127.0.0.1:8080 list todo.UitTodo
 > todo.UitTodo.Modify
 > todo.UitTodo.Remove
 ```
+
+## 8. 接口限流
+
+Orion基于令牌桶实现服务限流, 只需增加服务配置即可:
+
+```toml
+[[RateLimit]]
+Key = "/todo.UitTodo/Add"
+Cap = 1
+TokensPerSecond = 1
+```
+
+服务端会自动注册和引入限流中间件:
+
+```go
+interceptors.RateLimitorInterceptor(s.c.RateLimit, s.frameLogger)
+```
+
+启动服务可以查看到对应的日志:
+
+```log
+{"message":"[limitor] limitor registed","key":"/todo.UitTodo/Add","cap":1,"tokensPerSec":1}
+```
+
+当被限流后,会返回`4001`错误码:
+
+```shell
+rsp msg:"ok" err rpc error: code = Code(4001) desc = rate limited
+```

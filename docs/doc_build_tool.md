@@ -23,7 +23,7 @@ GOLDFLAGS += -X '$(BuilderPkg).BuildGoVersion=$(BuildGoVersion)'
 .PHONY: build clean build-version
 
 build:
-  go build -ldflags "$(GOLDFLAGS)" -o build/$(app_name) cmd/main.go 
+  go build -ldflags "$(GOLDFLAGS) -s -w" -o build/$(app_name) cmd/main.go 
 clean:
   rm build/*
 
@@ -41,3 +41,12 @@ Built Time   : 2024-09-23T12:21:35Z
 Go Version   : go version go1.22.1 linux/amd64 
 Uit Version  : dev0.0.2 
 ```
+
+构建体积优化: 
+
+```shell
+go build -ldflags "-s -w"
+```
+
+-s：忽略符号表和调试信息
+-w: 忽略DWARFv3调试信息，使用该选项后将无法使用gdb进行调试

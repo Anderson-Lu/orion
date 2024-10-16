@@ -11,6 +11,7 @@ import (
 
 	"github.com/Anderson-Lu/orion/orpc/build"
 	"github.com/Anderson-Lu/orion/orpc/interceptors"
+
 	"github.com/Anderson-Lu/orion/pkg/logger"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -82,6 +83,7 @@ func (s *Server) initGrpcServer() {
 			interceptors.ContextWrapperInterceptor(s.frameLogger),
 			interceptors.AccessInterceptor(s.accLogger),
 			interceptors.PanicInterceptor(s.panicLogger),
+			interceptors.RateLimitorInterceptor(s.c.RateLimit, s.frameLogger),
 		)),
 	)
 	reflection.Register(s.gServer)

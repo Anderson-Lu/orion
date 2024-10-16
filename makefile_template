@@ -17,7 +17,7 @@ GOLDFLAGS += -X '$(BuilderPkg).BuildGoVersion=$(BuildGoVersion)'
 .PHONY: build clean build-version proto
 
 build:
-	go build -ldflags "$(GOLDFLAGS)" -o build/$(app_name) cmd/main.go 
+	go build -ldflags "$(GOLDFLAGS)" -ldflags "-s -w" -gcflags=-m -o build/$(app_name) cmd/main.go 
 clean:
 	rm build/*
 
