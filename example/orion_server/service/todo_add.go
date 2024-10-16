@@ -20,5 +20,5 @@ func (s *Service) Add(ctx context.Context, in *todo.AddReq) (*todo.AddRsp, error
 	if needMockFail {
 		return &todo.AddRsp{}, errors.New("mock error")
 	}
-	return &todo.AddRsp{}, nil
+	return &todo.AddRsp{Msg: "ok"}, nil
 }

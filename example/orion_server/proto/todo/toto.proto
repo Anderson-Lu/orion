@@ -2,11 +2,7 @@ syntax = "proto3";
 
 package todo;
 
-<<<<<<< HEAD:example/orion_server/proto/todo/toto.proto
-option go_package = "github.com/orion/proto_go/uit/todo";
-=======
 option go_package = "github.com/Anderson-Lu/orion/proto_go/uit/todo";
->>>>>>> dev_0_0_2:example/orion_server/proto/todo/toto.proto
 
 // TodoStatus 状态
 enum TodoStatus {
@@ -27,7 +23,9 @@ message AddReq {
     TodoItem item = 1; 
 }
 
-message AddRsp {}
+message AddRsp {
+    string msg = 1;
+}
 
 message ListReq {}
 

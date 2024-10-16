@@ -3,6 +3,8 @@ package client
 import (
 	"context"
 	"errors"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/Anderson-Lu/orion/orpc/codes"
@@ -36,6 +38,10 @@ type OrionClientConfig struct {
 
 	// if set, circuit breaker will be set
 	CircuitBreakRules []*circuit_break.RuleConfig
+
+	// if not set, grpc protocol will be set
+	// cat be set to "grpc" or "http"
+	Protocol string
 }
 
 func New(c *OrionClientConfig) (*OrionClient, error) {
@@ -49,14 +55,11 @@ func New(c *OrionClientConfig) (*OrionClient, error) {
 		c.ConnectionBalancer = "random"
 	}
 	cli := &OrionClient{c: c}
-	cli.initBalancer()
-	for i := 0; i < int(c.ConnectionNum); i++ {
-		c, err := grpc.NewClient(c.Host, cli.dailOptions()...)
-		if err != nil {
-			return nil, err
-		}
-		cli.conns = append(cli.conns, c)
+	if err := cli.initConns(); err != nil {
+		return nil, err
 	}
+
+	cli.initBalancer()
 	cli.initCircuitBreaker()
 
 	return cli, nil
@@ -65,8 +68,36 @@ func New(c *OrionClientConfig) (*OrionClient, error) {
 type OrionClient struct {
 	b       balancer.Balancer
 	c       *OrionClientConfig
-	conns   []grpc.ClientConnInterface
+	oc      OrionConns
 	breaker *circuit_break.CircuitBreaker
+}
+
+func (o *OrionClient) initConns() error {
+
+	if o.c.Protocol == "" {
+		o.c.Protocol = "grpc"
+	} else {
+		o.c.Protocol = strings.ToLower(o.c.Protocol)
+	}
+
+	switch o.c.Protocol {
+	case "grpc":
+		conns, err := newRpcConns(o.c.Host, int(o.c.ConnectionNum), o.grpcDailOptions()...)
+		if err != nil {
+			return err
+		}
+		o.oc = conns
+		return nil
+	case "http":
+		conns, err := newHttpConns(int(o.c.ConnectionNum))
+		if err != nil {
+			return err
+		}
+		o.oc = conns
+		return nil
+	default:
+		return errors.New("invalid protocol schema")
+	}
 }
 
 func (o *OrionClient) initCircuitBreaker() {
@@ -90,30 +121,29 @@ func (o *OrionClient) initBalancer() {
 	}
 }
 
-func (o *OrionClient) dailOptions() []grpc.DialOption {
+func (o *OrionClient) grpcDailOptions() []grpc.DialOption {
 	r := []grpc.DialOption{}
 	r = append(r, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	return r
 }
 
 func (o *OrionClient) Invoke(ctx context.Context, method string, req, rsp interface{}, opts ...OrionClientInvokeOption) error {
-	if len(o.conns) == 0 {
+	if o.oc.Size() == 0 {
 		return errors.New("nil conn")
 	}
 	bIdx := o.b.Get(o.balanceOptions(opts...))
 	defer o.b.Update(bIdx)
 
-	ctx, err := o.beforeInvoke(ctx, method, req, rsp, opts...)
+	ctx, err := o.beforeInvoke(ctx, method, opts...)
 	if err != nil {
 		return o.afterInvoke(ctx, method, req, rsp, err, opts...)
 	}
 
-	options := o.buildOptions(opts...)
-	err = o.conns[bIdx].Invoke(ctx, method, req, rsp, options...)
+	err = o.oc.Invoke(ctx, bIdx, method, req, rsp, opts...)
 	return o.afterInvoke(ctx, method, req, rsp, err, opts...)
 }
 
-func (o *OrionClient) beforeInvoke(ctx context.Context, method string, req, rsp interface{}, opts ...OrionClientInvokeOption) (context.Context, error) {
+func (o *OrionClient) beforeInvoke(ctx context.Context, method string, opts ...OrionClientInvokeOption) (context.Context, error) {
 
 	ctx = context.WithValue(ctx, _OrionReqBeginTimeKey, time.Now().UnixMilli())
 
@@ -145,7 +175,13 @@ func (o *OrionClient) afterInvoke(ctx context.Context, method string, req, rsp i
 	reqCost := o.cost(ctx)
 
 	if needCheckCircuit && o.breaker != nil && codes.GetCodeFromError(err) != codes.ErrCodeCircuitBreak {
-		o.breaker.Report(method, err == nil, int64(reqCost))
+		m := method
+		if o.c.Protocol == "http" {
+			if u, err := url.Parse(method); err == nil {
+				m = u.Path
+			}
+		}
+		o.breaker.Report(m, err == nil, int64(reqCost))
 	}
 
 	return err
@@ -169,17 +205,4 @@ func (o *OrionClient) balanceOptions(opts ...OrionClientInvokeOption) string {
 		}
 	}
 	return ""
-}
-
-func (o *OrionClient) buildOptions(opts ...OrionClientInvokeOption) []grpc.CallOption {
-	r := []grpc.CallOption{}
-	for _, opt := range opts {
-		switch opt.Type() {
-		case OptionTypeGrpcCallOption:
-			for _, v := range opt.Params() {
-				r = append(r, v.(grpc.CallOption))
-			}
-		}
-	}
-	return r
 }

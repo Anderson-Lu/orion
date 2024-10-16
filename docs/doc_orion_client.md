@@ -22,6 +22,40 @@ type OrionClientConfig struct {
 }
 ```
 
+# 创建HTTP客户端
+
+使用方法和上述一致,只需要在创建时指定协议即可:
+
+```go
+// 创建客户端
+cli, err := client.New(&client.OrionClientConfig{
+  ConnectionNum:      1,
+  ConnectionBalancer: "json",
+  CircuitBreakRules: []*circuit_break.RuleConfig{
+    {
+      Name:             "/todo.UitTodo/Add",
+      Window:           &circuit_break.WindowConfig{},
+      OpenDuration:     1000,
+      HalfOpenDuration: 100,
+      HaflOpenPassRate: 0,
+      RuleExpression:   "req_count >= 1 && succ_rate < 0.90",
+    },
+  },
+  Protocol: "http", // 指定走http协议通道
+})
+
+// 指定header
+opts := []client.OrionClientInvokeOption{
+  client.WithJson(),
+  client.WithHash("uid"),
+  client.WithCircuitBreak("/todo.UitTodo/Add"),
+  client.WithHeaders("Content-Type", "application/grpc"), // 走http方式访问grpc服务
+}
+
+// 调用
+err := cli.Invoke(context.Background(), "http://127.0.0.1:8080/todo.UitTodo/Add", req, rsp, opts...)
+```
+
 # 使用Json协议发起grpc请求
 
 - 客户端在调用的时候支持编码器`client.WithJson()`
