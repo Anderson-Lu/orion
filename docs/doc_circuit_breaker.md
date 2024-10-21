@@ -82,7 +82,7 @@ const (
 
 # 快速开始
 
-更多详情,参见:[容器器示例](../example/circuit_break/main.go)
+更多详情,参见:[熔断器示例](../example/circuit_break/main.go)
 
 ```go
 rc := &circuit_break.RuleConfig{
