@@ -22,9 +22,9 @@
 
 ## Orion优雅编程
 
-- [熔断器](./docs/doc_circuit_breaker.md)
-- [限流器](./docs/doc_get_start.md)
-- [分发器](./docs/doc_get_start.md)
+- [熔断器(OrionCircuitBreaker)](./docs/doc_circuit_breaker.md)
+- [限流器(OrionRateLimiter)](./docs/doc_get_start.md)
+- [分发器(OrionDispatcher)](./docs/doc_get_start.md)
 - [容器优化](./docs/doc_docker.md)
 - [本地缓存TickerCache](./docs/doc_ticker_cache.md)
 - [自动注入构建版本](./docs/doc_build_tool.md)

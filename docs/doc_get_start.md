@@ -100,11 +100,11 @@ func main() {
   }
 
   handler, _ := service.NewService(c)
-  server, err := urpc.New(
-    urpc.WithConfigFile("../config/config.toml"),
-    urpc.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),
-    urpc.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint),
-    urpc.WithFlags(),
+  server, err := orpc.New(
+    orpc.WithConfigFile("../config/config.toml"),
+    orpc.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),
+    orpc.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint),
+    orpc.WithFlags(),
   )
   if err != nil {
     log.Fatal(err)
@@ -161,9 +161,9 @@ c := &uit.Config{
 使用`grpc-gateway`插件为服务提供http服务, 支持在同一个端口同时支持GRPC和HTTP协议,配置项:
 
 ```go
-server, err := uit.New(c,
-  uit.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),          // 支持 grpc 协议
-  uit.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint), // 支持 http 协议
+server, err := orpc.New(c,
+  orpc.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),          // 支持 grpc 协议
+  orpc.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint), // 支持 http 协议
   ...
 )
 ```
