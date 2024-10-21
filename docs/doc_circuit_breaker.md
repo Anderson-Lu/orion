@@ -47,11 +47,11 @@ type RuleConfig struct {
 OrionCircuitBreaker支持业务通过表达式实现灵活的熔断策略, 目前支持的字段如下:
 
 ```go
-  FieldRequestNum     string = "req_count"
-  FieldRequestSuccNum string = "req_succ_count"
-  FieldRequestFailNum string = "req_fail_count"
-  FieldSuccRate       string = "succ_rate"
-  FieldAvgCost        string = "avg_cost"
+  FieldRequestNum     string = "req_count" // 请求数
+  FieldRequestSuccNum string = "req_succ_count" // 请求成功数
+  FieldRequestFailNum string = "req_fail_count" // 请求失败数
+  FieldSuccRate       string = "succ_rate" // 请求成功率
+  FieldAvgCost        string = "avg_cost" // 请求平均时延
 ```
 
 举例: 在**当前窗口内请求数>100且成功率低于50%**时触发熔断, 此时可以采用表达式:
