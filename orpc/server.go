@@ -14,7 +14,7 @@ import (
 	"github.com/Anderson-Lu/orion/orpc/build"
 	"github.com/Anderson-Lu/orion/orpc/interceptors"
 	"github.com/Anderson-Lu/orion/orpc/registry"
-	"github.com/Anderson-Lu/orion/orpc/registry/registry_consul"
+	"github.com/Anderson-Lu/orion/orpc/registry/orion_consul"
 
 	"github.com/Anderson-Lu/orion/pkg/logger"
 	"github.com/Anderson-Lu/orion/pkg/utils"
@@ -107,7 +107,7 @@ func (s *Server) initGrpcServer() error {
 	}
 
 	switch rsyi := s.rsy.(type) {
-	case *registry_consul.OrionConsulRegistry:
+	case *orion_consul.OrionConsulRegistry:
 		ip := utils.IP().GetLocalIP()
 		port := s.c.Server.Port
 		if err := rsyi.AddNode(context.Background(), ip, port); err != nil {

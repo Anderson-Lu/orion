@@ -1,4 +1,4 @@
-package registry_consul
+package orion_consul
 
 import (
 	"context"
