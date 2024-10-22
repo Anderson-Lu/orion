@@ -33,6 +33,12 @@ PanicLogger:
 
 ServiceLogger:
   Path: '../log/service.log'
+
+Registry:
+  Service: "mine.namespace.demo"
+  IP: "127.0.0.1"
+  Port: 8500
+
 ```
 
 更多配置模版:

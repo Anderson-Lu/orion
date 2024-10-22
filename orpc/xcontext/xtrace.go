@@ -2,7 +2,6 @@ package xcontext
 
 import (
 	"context"
-	"fmt"
 
 	"google.golang.org/grpc/metadata"
 )
@@ -23,7 +22,6 @@ func BuildTraceHeader(ctx context.Context) *TracerHeader {
 	if !ok {
 		return &TracerHeader{}
 	}
-	fmt.Println(md)
 	return &TracerHeader{
 		RequestId: getFirstElementFromArray(md.Get(KEY_X_REQUEST_ID)),
 		Forward:   getFirstElementFromArray(md.Get(KEY_X_FORWARDED_FOR)),

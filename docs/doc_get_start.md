@@ -215,3 +215,46 @@ interceptors.RateLimitorInterceptor(s.c.RateLimit, s.frameLogger)
 ```shell
 rsp msg:"ok" err rpc error: code = Code(4001) desc = rate limited
 ```
+
+## 9. 微服务注册(Orion集成模式)
+
+在配置文件中指定当前服务的微服务名(ID),以及注册中心(Consul)的组件IP和地址,
+
+```shell
+# config.toml
+
+[Registry]
+Service = "mine.namespace.demo"
+IP = "127.0.0.1"
+Port = 8500
+```
+
+然后在服务端启动时引入以下注册中心即可(orpc.WithRegistry):
+
+```go
+server, err := orpc.New(
+  orpc.WithConfigFile("../config/config.toml"),
+  orpc.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),
+  orpc.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint),
+  orpc.WithFlags(),
+  // 加上这个即可
+  orpc.WithRegistry(registry.RegisteyConsul), 
+)
+```
+
+服务启动后, 在consul的日志中,可以看到相关日志:
+
+```shell
+consul-consul-node1-1  | 2024-01-22T02:04:04.190Z [INFO]  agent: Synced service: service=mine.namespace.demo
+consul-consul-node1-1  | 2024-01-22T02:04:08.958Z [INFO]  agent: Synced check: check=service:mine.namespace.demo
+```
+
+**注意: ** Orion默认会每10s回查一次保活,1m超时检查失败后会取消当前节点的注册.
+
+同时在Orion集成模式下,Orion会自动注册以下健康状态检查服务:
+
+```shell
+# grpcurl -plaintext 127.0.0.1:8080 list grpc.health.v1.Health
+grpc.health.v1.Health.Check
+grpc.health.v1.Health.Watch
+```

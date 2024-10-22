@@ -2,6 +2,11 @@
 Port = 8080
 EnableGRPCGateway = true
 
+[Registry]
+Service = "mine.namespace.demo"
+IP = "127.0.0.1"
+Port = 8500
+
 [PromtheusConfig]
 Enable = true
 Port = 9092

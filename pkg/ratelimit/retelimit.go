@@ -43,7 +43,7 @@ func (r *RateLimiters) Register(config *Config) error {
 
 func (r *RateLimiters) Allow(key string) bool {
 	if key == "" {
-		return false
+		return true
 	}
 
 	r.mu.RLock()
@@ -53,7 +53,7 @@ func (r *RateLimiters) Allow(key string) bool {
 		return lim.Allow()
 	}
 
-	return false
+	return true
 }
 
 type TokenRateLimitor struct {

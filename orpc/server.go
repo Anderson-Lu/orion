@@ -4,15 +4,20 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"net"
 	"net/http"
 
 	"github.com/Anderson-Lu/orion/orpc/build"
 	"github.com/Anderson-Lu/orion/orpc/interceptors"
+	"github.com/Anderson-Lu/orion/orpc/registry"
+	"github.com/Anderson-Lu/orion/orpc/registry/registry_consul"
 
 	"github.com/Anderson-Lu/orion/pkg/logger"
+	"github.com/Anderson-Lu/orion/pkg/utils"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -52,10 +57,18 @@ type Server struct {
 	grpcOpts     []grpc.DialOption
 	gatewayFunc  func(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)
 	grpcHandlers map[interface{}][]*grpc.ServiceDesc
+
+	rsy  registry.IRegistry
+	sig  chan os.Signal
+	gsig chan any
 }
 
 func New(opts ...ServerOption) (*Server, error) {
+
 	s := &Server{}
+	s.sig = make(chan os.Signal, 1)
+	s.gsig = make(chan any, 1)
+
 	if err := s.initOptions(opts...); err != nil {
 		return nil, err
 	}
@@ -77,7 +90,7 @@ func (s *Server) initOptions(opts ...ServerOption) error {
 	return nil
 }
 
-func (s *Server) initGrpcServer() {
+func (s *Server) initGrpcServer() error {
 	s.gServer = grpc.NewServer(
 		grpc.UnaryInterceptor(interceptors.ChainInterceptors(
 			interceptors.ContextWrapperInterceptor(s.frameLogger),
@@ -92,6 +105,18 @@ func (s *Server) initGrpcServer() {
 			s.gServer.RegisterService(sd, handler)
 		}
 	}
+
+	switch rsyi := s.rsy.(type) {
+	case *registry_consul.OrionConsulRegistry:
+		ip := utils.IP().GetLocalIP()
+		port := s.c.Server.Port
+		if err := rsyi.AddNode(context.Background(), ip, port); err != nil {
+			return err
+		}
+		rsyi.RegisterHealthHandler(s.gServer)
+	}
+
+	return nil
 }
 
 func (s *Server) initLogger() error {
@@ -140,6 +165,8 @@ func (s *Server) serveFlags() bool {
 
 func (s *Server) ListenAndServe() error {
 
+	signal.Notify(s.sig, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGINT)
+
 	if s.cmdMode {
 		if ok := s.serveFlags(); ok {
 			return nil
@@ -150,25 +177,46 @@ func (s *Server) ListenAndServe() error {
 	defer s.frameLogger.Sync()
 	defer s.panicLogger.Sync()
 
-	eg := errgroup.Group{}
-	eg.Go(func() error {
-		if s.c.Server != nil {
-			return s.start()
-		}
-		return nil
-	})
+	go s.startServers()
 
-	eg.Go(func() error {
-		if s.c.PromtheusConfig == nil || !s.c.PromtheusConfig.Enable || s.c.PromtheusConfig.Port == 0 {
-			return nil
-		}
-		return s.runPromtheusMetrics()
-	})
-	return eg.Wait()
+	select {
+	case stopSig := <-s.sig:
+		s.stop(fmt.Sprintf("accept system signal stopped, signal:[%s]", stopSig.String()))
+	case stopInfo := <-s.gsig:
+		s.stop(stopInfo)
+	}
+	return nil
 }
 
-func (s *Server) Stop() {
-	s.frameLogger.Info("[Server] server stopped", "port", s.c.Server.Port)
+func (s *Server) startServers() {
+	fn := func() error {
+		eg := errgroup.Group{}
+		eg.Go(func() error {
+			if s.c.Server != nil {
+				return s.start()
+			}
+			return nil
+		})
+
+		eg.Go(func() error {
+			if s.c.PromtheusConfig == nil || !s.c.PromtheusConfig.Enable || s.c.PromtheusConfig.Port == 0 {
+				return nil
+			}
+			return s.runPromtheusMetrics()
+		})
+		return eg.Wait()
+	}
+	if err := fn(); err != nil {
+		s.gsig <- err
+	}
+}
+
+func (s *Server) stop(info any) {
+	s.frameLogger.Info("[Server] server stopped", "port", s.c.Server.Port, "context", info)
+
+	if s.rsy != nil {
+		s.rsy.RemoveNode(context.Background())
+	}
 }
 
 func (s *Server) runPromtheusMetrics() error {
@@ -184,7 +232,10 @@ func (s *Server) runPromtheusMetrics() error {
 
 func (s *Server) start() error {
 
-	s.initGrpcServer()
+	if err := s.initGrpcServer(); err != nil {
+		s.frameLogger.Info("[Server] gRPC server init fail", "port", s.c.Server.Port, "err", err.Error())
+		return err
+	}
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.c.Server.Port))
 	if err != nil {

@@ -17,10 +17,17 @@ type PromtheusConfig struct {
 
 type Config struct {
 	Server          *ServerConfig        `yaml:"Server" json:"Server" toml:"Server"`
+	Registry        *Registry            `yaml:"Registry" json:"Registry" toml:"Registry"`
 	PromtheusConfig *PromtheusConfig     `yaml:"PromtheusConfig" json:"PromtheusConfig" toml:"PromtheusConfig"`
 	FrameLogger     *logger.LoggerConfig `yaml:"FrameLogger" json:"FrameLogger" toml:"FrameLogger"`
 	AccessLogger    *logger.LoggerConfig `yaml:"AccessLogger" json:"AccessLogger" toml:"AccessLogger"`
 	ServiceLogger   *logger.LoggerConfig `yaml:"ServiceLogger" json:"ServiceLogger" toml:"ServiceLogger"`
 	PanicLogger     *logger.LoggerConfig `yaml:"PanicLogger" json:"PanicLogger" toml:"PanicLogger"`
 	RateLimit       []*ratelimit.Config  `yaml:"RateLimit" json:"RateLimit" toml:"RateLimit"`
+}
+
+type Registry struct {
+	Service string `yaml:"Service" json:"Service" toml:"Service"`
+	IP      string `yaml:"IP" json:"IP" toml:"IP"`
+	Port    uint32 `yaml:"Port" json:"Port" toml:"Port"`
 }
