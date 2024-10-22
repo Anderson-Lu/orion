@@ -1,5 +1,7 @@
 package circuit_break
 
+import "sync"
+
 type CircuitBreakStatus int
 
 const (
@@ -9,6 +11,7 @@ const (
 )
 
 type CircuitBreaker struct {
+	mu    sync.RWMutex
 	rules map[string]*Rule
 }
 
@@ -22,6 +25,8 @@ func (c *CircuitBreaker) Register(rc *RuleConfig) {
 	if c.rules == nil {
 		return
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if _, ok := c.rules[rc.Name]; ok {
 		return
 	}
@@ -29,6 +34,8 @@ func (c *CircuitBreaker) Register(rc *RuleConfig) {
 }
 
 func (c *CircuitBreaker) Pass(resourceId string) bool {
+	c.mu.RLock()
+	defer c.mu.RLock()
 	r := c.rules[resourceId]
 	if r == nil {
 		return true
@@ -37,6 +44,8 @@ func (c *CircuitBreaker) Pass(resourceId string) bool {
 }
 
 func (c *CircuitBreaker) Report(resourceId string, result bool, cost int64) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	r := c.rules[resourceId]
 	if r == nil {
 		return
