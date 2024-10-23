@@ -3,12 +3,7 @@
 ```go
 import "github.com/Anderson-Lu/orion/orpc/client"
 
-cli, err := client.New(&client.OrionClientConfig{
-  Host:               "127.0.0.1:8080",
-  DailTimeout:        3000,
-  ConnectionNum:      1,
-  ConnectionBalancer: "random",
-})
+cli, err := client.New(resolver)
 ```
 
 配置项:
@@ -74,8 +69,11 @@ if err := cli.Invoke(ctx, "/todo.UitTodo/Add", req, rsp, client.WithHash("uid"))
 依赖[熔断组件](./doc_circuit_breaker.md), Orion框架内部集成熔断策略. 只需要在创建客户端时指定对应的选项即可.
 
 ```go
+// 直连模式
+rsv := resolver.NewDirectResolver("127.0.0.1:8080")
+cli, err := client.New(rsv)
+
 // 创建客户端并注册对应的熔断策略
-cli, err := client.New(&client.OrionClientConfig{Host: "127.0.0.1:8080", DailTimeout: 10000})
 cli.RegisterCircuitBreakRule(&circuit_break.RuleConfig{
   Name:             "/todo.UitTodo/Add",
   Window:           &circuit_break.WindowConfig{Duration: 1000, Buckets: 10},
@@ -97,3 +95,16 @@ err := cli.Invoke(context.Background(), "/todo.UitTodo/Add", req, rsp, opts...)
 // 判断是否被熔断了(3001)
 isCircuitError := codes.GetCodeFromError(err) == codes.ErrCodeCircuitBreak
 ```
+
+# 服务发现(OrionResolver)
+
+在Orion中,服务发现统一封装在不同的**Resolver**中, 用于服务的发现:
+
+```go
+type IResolver interface {
+	Name() string
+	Select(serviceName string) (*grpc.ClientConn, error)
+}
+```
+
+因此,业务可以实现自己的微服务服务发现逻辑,从而保证Orion框架的灵活性和扩展性. 目前,内置了直连模式(DirectResolver)和Consul模式(ConsulResover)

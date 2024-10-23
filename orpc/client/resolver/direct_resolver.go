@@ -6,18 +6,22 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func NewDefaultResolver(address string) IResolver {
-	return &DefaultResolver{address: address}
+func NewDirectResolver(address string) IResolver {
+	return &DirectResolver{address: address}
 }
 
-type DefaultResolver struct {
+type DirectResolver struct {
 	c       *grpc.ClientConn
 	address string
 	sg      singleflight.Group
 	inited  bool
 }
 
-func (d *DefaultResolver) Select() (*grpc.ClientConn, error) {
+func (d *DirectResolver) Name() string {
+	return "default"
+}
+
+func (d *DirectResolver) Select(serviceName string) (*grpc.ClientConn, error) {
 	c, err, _ := d.sg.Do("init", func() (interface{}, error) {
 		if d.inited {
 			return d.c, nil

@@ -7,12 +7,19 @@ import (
 
 	"github.com/Anderson-Lu/orion/orpc/client"
 	"github.com/Anderson-Lu/orion/orpc/client/options"
+	"github.com/Anderson-Lu/orion/orpc/client/resolver"
+	"github.com/Anderson-Lu/orion/orpc/registry/orion_consul"
 	"github.com/Anderson-Lu/orion/pkg/circuit_break"
 )
 
 func main() {
 
-	cli, err := client.New(&client.OrionClientConfig{Host: "127.0.0.1:8080", DailTimeout: 10000})
+	c, err := orion_consul.NewOrionConsulWatcher("127.0.0.1:8500", "mine.namespace.demo")
+	fmt.Println("=--", c, err)
+	c.Run()
+	select {}
+
+	cli, err := client.New(resolver.NewDirectResolver("127.0.0.1:8080"))
 	cli.RegisterCircuitBreakRule(&circuit_break.RuleConfig{
 		Name:             "/todo.UitTodo/Add",
 		Window:           &circuit_break.WindowConfig{Duration: 1000, Buckets: 10},

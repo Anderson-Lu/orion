@@ -13,13 +13,14 @@
 
 ## 快速开始
 
-- [快速开始](./docs/doc_get_start.md)
-- [Orion设计哲学](./docs/doc_design.md)
+- [Orion服务端](./docs/doc_get_start.md)
 - [Orion配置说明](./docs/doc_config.md) 
+- [Orion客户端](./docs/doc_orion_client.md) 
+- [Orion设计哲学](./docs/doc_design.md)
 - [Orion服务注册&发现](./docs/doc_discovery.md)
 - [Orion-Cli脚手架](./docs/doc_cli.md) 
-- [Orion客户端](./docs/doc_orion_client.md) 
 - [Orion错误码](./orpc/codes/codes.go)
+- [Orion DevOps实践](./docs/doc_get_start.md)
 
 ## Orion优雅编程
 

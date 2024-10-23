@@ -8,36 +8,18 @@ import (
 	"github.com/Anderson-Lu/orion/orpc/client/resolver"
 	"github.com/Anderson-Lu/orion/orpc/codes"
 	"github.com/Anderson-Lu/orion/pkg/circuit_break"
-	"google.golang.org/grpc"
 )
 
-var (
-	_OrionDefaultClientConfig = &OrionClientConfig{DailTimeout: 1000}
-)
-
-type OrionClientConfig struct {
-	// server
-	Host string
-
-	// timout milliseconds for async dialing
-	DailTimeout int64
-}
-
-func New(c *OrionClientConfig) (*OrionClient, error) {
-	if c == nil {
-		c = _OrionDefaultClientConfig
-	}
-
-	cli := &OrionClient{c: c}
+func New(rsv resolver.IResolver) (*OrionClient, error) {
+	cli := &OrionClient{}
 	cli.breaker = circuit_break.NewCircuitBreaker()
-	cli.oc = resolver.NewDefaultResolver(c.Host)
+	cli.rsv = rsv
 
 	return cli, nil
 }
 
 type OrionClient struct {
-	c       *OrionClientConfig
-	oc      resolver.IResolver
+	rsv     resolver.IResolver
 	breaker *circuit_break.CircuitBreaker
 }
 
@@ -57,22 +39,13 @@ func (o *OrionClient) Invoke(ctx context.Context, method string, req, rsp interf
 		return o.after(oCtx, method, req, rsp)
 	}
 
-	conn, err := o.checkResolver(oCtx)
+	conn, err := o.rsv.Select(method)
 	if err != nil {
 		return o.after(oCtx, method, req, rsp)
 	}
 
 	oCtx.err = conn.Invoke(oCtx.ctx, method, req, rsp, oCtx.options()...)
 	return o.after(oCtx, method, req, rsp)
-}
-
-func (o *OrionClient) checkResolver(ctx *Context) (*grpc.ClientConn, error) {
-	conn, err := o.oc.Select()
-	if err != nil {
-		ctx.err = err
-		return nil, err
-	}
-	return conn, nil
 }
 
 func (o *OrionClient) checkBreak(ctx *Context, method string) error {
