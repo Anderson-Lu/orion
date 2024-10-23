@@ -1,3 +1,4 @@
 example/orion_server/build
 example/orion_server/log
 .log
+.vscode

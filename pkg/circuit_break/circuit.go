@@ -35,7 +35,7 @@ func (c *CircuitBreaker) Register(rc *RuleConfig) {
 
 func (c *CircuitBreaker) Pass(resourceId string) bool {
 	c.mu.RLock()
-	defer c.mu.RLock()
+	defer c.mu.RUnlock()
 	r := c.rules[resourceId]
 	if r == nil {
 		return true

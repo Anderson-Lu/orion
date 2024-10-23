@@ -13,11 +13,13 @@ type CallOptionWithJson struct {
 }
 
 func (c CallOptionWithJson) Params() []interface{} {
-	return []interface{}{
-		grpc.CallContentSubtype(codec.JSON{}.Name()),
-	}
+	return []interface{}{}
 }
 
 func (c CallOptionWithJson) Type() OptionType {
 	return OptionTypeGrpcCallOption
+}
+
+func (c CallOptionWithJson) GrpcCallOption() grpc.CallOption {
+	return grpc.CallContentSubtype(codec.JSON{}.Name())
 }

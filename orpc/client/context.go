@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/Anderson-Lu/orion/orpc/client/options"
-	"github.com/Anderson-Lu/orion/pkg/circuit_break"
 	"google.golang.org/grpc"
 )
 
@@ -18,24 +17,28 @@ type Context struct {
 	opts []options.OrionClientInvokeOption
 }
 
-func (c *Context) matchBreaker(method string) (bool, *circuit_break.RuleConfig) {
+func (c *Context) matchBreaker() bool {
 	for _, v := range c.opts {
 		if v.Type() == options.OptionTypeCircuitBreakOption {
-			if matched, ruleConfig := (v.(*options.CircuitBreakerOption)).IsMatch(method); matched {
-				return true, ruleConfig
-			}
+			return true
 		}
 	}
-	return false, nil
+	return false
 }
 
 func (c *Context) cost() int64 {
-	c.end = time.Now().Unix()
+	c.end = time.Now().UnixMilli()
 	return c.end - c.begin
 }
 
 func (c *Context) options() []grpc.CallOption {
 	r := []grpc.CallOption{}
+	for _, v := range c.opts {
+		switch k := v.(type) {
+		case *options.CallOptionWithJson:
+			r = append(r, k.GrpcCallOption())
+		}
+	}
 	return r
 }
 

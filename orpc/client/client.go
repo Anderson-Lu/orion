@@ -41,6 +41,15 @@ type OrionClient struct {
 	breaker *circuit_break.CircuitBreaker
 }
 
+func (o *OrionClient) RegisterCircuitBreakRule(ruleConfigs ...*circuit_break.RuleConfig) {
+	if o.breaker == nil {
+		return
+	}
+	for _, v := range ruleConfigs {
+		o.breaker.Register(v)
+	}
+}
+
 func (o *OrionClient) Invoke(ctx context.Context, method string, req, rsp interface{}, opts ...options.OrionClientInvokeOption) error {
 
 	oCtx := newContext(ctx, opts...)
@@ -68,10 +77,10 @@ func (o *OrionClient) checkResolver(ctx *Context) (*grpc.ClientConn, error) {
 
 func (o *OrionClient) checkBreak(ctx *Context, method string) error {
 
-	if ok, ruleConfig := ctx.matchBreaker(method); o.breaker != nil && ok && ruleConfig != nil {
-		o.breaker.Register(ruleConfig)
+	if ok := ctx.matchBreaker(); o.breaker != nil && ok {
 		if canPass := o.breaker.Pass(method); !canPass {
-			return codes.WrapCodeFromError(errors.New("circuit break"), codes.ErrCodeCircuitBreak)
+			ctx.err = codes.WrapCodeFromError(errors.New("circuit break"), codes.ErrCodeCircuitBreak)
+			return ctx.err
 		}
 	}
 	return nil
@@ -79,7 +88,7 @@ func (o *OrionClient) checkBreak(ctx *Context, method string) error {
 
 func (o *OrionClient) after(ctx *Context, method string, req, rsp interface{}) error {
 	reqCost := ctx.cost()
-	if ok, _ := ctx.matchBreaker(method); ok && o.breaker != nil && codes.GetCodeFromError(ctx.err) != codes.ErrCodeCircuitBreak {
+	if ok := ctx.matchBreaker(); ok && o.breaker != nil && codes.GetCodeFromError(ctx.err) != codes.ErrCodeCircuitBreak {
 		o.breaker.Report(method, ctx.err == nil, int64(reqCost))
 	}
 	return ctx.err
