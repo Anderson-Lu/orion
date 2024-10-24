@@ -21,7 +21,7 @@ func (d *DirectResolver) Name() string {
 	return "default"
 }
 
-func (d *DirectResolver) Select(serviceName string) (*grpc.ClientConn, error) {
+func (d *DirectResolver) Select(serviceName string, params ...interface{}) (*grpc.ClientConn, error) {
 	c, err, _ := d.sg.Do("init", func() (interface{}, error) {
 		if d.inited {
 			return d.c, nil

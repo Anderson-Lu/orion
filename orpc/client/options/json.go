@@ -17,7 +17,7 @@ func (c CallOptionWithJson) Params() []interface{} {
 }
 
 func (c CallOptionWithJson) Type() OptionType {
-	return OptionTypeGrpcCallOption
+	return OptionTypeGrpcCall
 }
 
 func (c CallOptionWithJson) GrpcCallOption() grpc.CallOption {

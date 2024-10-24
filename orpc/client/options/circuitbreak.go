@@ -16,7 +16,7 @@ func (c CallOptionWithCircuitBreaker) Params() []interface{} {
 }
 
 func (c CallOptionWithCircuitBreaker) Type() OptionType {
-	return OptionTypeCircuitBreakOption
+	return OptionTypeCircuitBreak
 }
 
 func (c CallOptionWithCircuitBreaker) Key() string {

@@ -13,7 +13,7 @@ func (c CallOptionWithPath) Params() []interface{} {
 }
 
 func (c CallOptionWithPath) Type() OptionType {
-	return OptionTYpeMethod
+	return OptionTypeMethod
 }
 
 func (c CallOptionWithPath) Method() string {

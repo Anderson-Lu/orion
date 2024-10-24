@@ -6,6 +6,7 @@ import (
 
 	"github.com/Anderson-Lu/orion/orpc/client/options"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 type OrionRequestMeta struct {
@@ -20,13 +21,15 @@ type OrionRequestMeta struct {
 	errs  []error
 
 	// discovery
-	service       string
-	method        string
-	direct        string
-	directEnable  bool
-	resolverKey   string
-	circuitEnable bool
-	circuitKey    string
+	service        string
+	method         string
+	direct         string
+	directEnable   bool
+	resolverKey    string
+	circuitEnable  bool
+	circuitKey     string
+	balancerParams []interface{}
+	headers        metadata.MD
 
 	// request
 	req         interface{}
@@ -57,6 +60,15 @@ func (c *OrionRequestMeta) wrapError(err error) {
 	c.errs = append(c.errs, err)
 }
 
+func (c *OrionRequestMeta) buildContext() context.Context {
+	if c.headers == nil {
+		return c.ctx
+	}
+
+	cc := metadata.NewOutgoingContext(c.ctx, c.headers)
+	return cc
+}
+
 func newOrionRequestMeta(ctx context.Context, req, rsp interface{}, opts ...options.OrionClientInvokeOption) *OrionRequestMeta {
 	o := &OrionRequestMeta{
 		ctx:   ctx,
@@ -80,6 +92,10 @@ func newOrionRequestMeta(ctx context.Context, req, rsp interface{}, opts ...opti
 			o.circuitKey = opt.Key()
 		case *options.CallOptionWithJson:
 			o.callOptions = append(o.callOptions, opt.GrpcCallOption())
+		case *options.CallOptionWithBalancerParams:
+			o.balancerParams = v.Params()
+		case *options.CallOptionWithHeader:
+			o.headers = opt.Metadata()
 		}
 	}
 	if o.service != "" {

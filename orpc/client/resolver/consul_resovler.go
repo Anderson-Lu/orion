@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/Anderson-Lu/orion/orpc/client/balancer"
 	"github.com/Anderson-Lu/orion/orpc/codes"
 	"github.com/Anderson-Lu/orion/orpc/registry/orion_consul"
-	"github.com/Anderson-Lu/orion/pkg/balancer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -69,12 +69,12 @@ func (c *ConsulResovler) getConns(serviceName string) *ConsulResovlerConns {
 	return k
 }
 
-func (c *ConsulResovler) Select(serviceName string) (*grpc.ClientConn, error) {
+func (c *ConsulResovler) Select(serviceName string, params ...interface{}) (*grpc.ClientConn, error) {
 	if conn := c.getConns(serviceName); conn == nil {
 		go c.watchers.Watch(serviceName)
 		return nil, codes.ErrClientConnNotEstablished
 	} else {
-		return conn.Select(serviceName)
+		return conn.Select(serviceName, params...)
 	}
 }
 
@@ -127,7 +127,7 @@ func (c *ConsulResovlerConns) update(incomingAddrs []string) {
 	c.b.Resize(len(c.conns))
 }
 
-func (c *ConsulResovlerConns) Select(serviceName string) (*grpc.ClientConn, error) {
+func (c *ConsulResovlerConns) Select(serviceName string, params ...interface{}) (*grpc.ClientConn, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -135,7 +135,7 @@ func (c *ConsulResovlerConns) Select(serviceName string) (*grpc.ClientConn, erro
 		return nil, codes.ErrClientConnNotEstablished
 	}
 
-	connIdx := c.b.Get()
+	connIdx := c.b.Get(params...)
 	c.b.Update(connIdx)
 
 	return c.conns[connIdx].c, nil

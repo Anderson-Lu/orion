@@ -47,9 +47,9 @@ func (o *OrionClient) Invoke(ctx context.Context, req, rsp interface{}, opts ...
 	var err error
 	if meta.directEnable {
 		drsv := resolver.NewDirectResolver(meta.direct)
-		conn, err = drsv.Select(meta.resolverKey)
+		conn, err = drsv.Select(meta.resolverKey, meta.balancerParams...)
 	} else {
-		conn, err = o.rsv.Select(meta.resolverKey)
+		conn, err = o.rsv.Select(meta.resolverKey, meta.balancerParams...)
 	}
 
 	if err != nil {
@@ -57,7 +57,7 @@ func (o *OrionClient) Invoke(ctx context.Context, req, rsp interface{}, opts ...
 		return o.after(meta)
 	}
 
-	meta.wrapError(conn.Invoke(meta.ctx, meta.method, req, rsp, meta.callOptions...))
+	meta.wrapError(conn.Invoke(meta.buildContext(), meta.method, req, rsp, meta.callOptions...))
 	return o.after(meta)
 }
 

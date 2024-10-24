@@ -1,6 +1,8 @@
 package balancer
 
-import "sync/atomic"
+import (
+	"sync/atomic"
+)
 
 type Balancer interface {
 	Get(params ...interface{}) int
@@ -8,6 +10,8 @@ type Balancer interface {
 	Resize(size int)
 	Copy() Balancer
 }
+
+type RoundRobinBalancer = DefaultBalancer
 
 func NewDefaultBalancer() *DefaultBalancer {
 	return &DefaultBalancer{}

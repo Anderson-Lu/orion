@@ -3,11 +3,12 @@ package options
 type OptionType int
 
 const (
-	OptionTypeGrpcCallOption     OptionType = 1
-	OptionTypeBalanceOption      OptionType = 2
-	OptionTypeCircuitBreakOption OptionType = 3
-	OptionTypeResovler           OptionType = 4
-	OptionTYpeMethod             OptionType = 5
+	OptionTypeGrpcCall     OptionType = 1
+	OptionTypeBalancer     OptionType = 2
+	OptionTypeCircuitBreak OptionType = 3
+	OptionTypeResovler     OptionType = 4
+	OptionTypeMethod       OptionType = 5
+	OptionTypeMetadata     OptionType = 6
 )
 
 type OrionClientInvokeOption interface {
