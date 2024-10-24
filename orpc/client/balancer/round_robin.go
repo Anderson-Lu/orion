@@ -11,6 +11,11 @@ type Balancer interface {
 	Copy() Balancer
 }
 
+var (
+	_ Balancer = (*Crc32HashBalancer)(nil)
+	_ Balancer = (*RoundRobinBalancer)(nil)
+)
+
 type RoundRobinBalancer = DefaultBalancer
 
 func NewDefaultBalancer() *DefaultBalancer {

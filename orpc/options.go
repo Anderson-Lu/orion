@@ -6,7 +6,7 @@ import (
 
 	"github.com/Anderson-Lu/orion/orpc/parser"
 	"github.com/Anderson-Lu/orion/orpc/registry"
-	"github.com/Anderson-Lu/orion/orpc/registry/orion_consul"
+	"github.com/Anderson-Lu/orion/orpc/registry/consul"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
@@ -65,7 +65,7 @@ func WithRegistry(r registry.RegisteyMode) ServerOption {
 			if s.c == nil || s.c.Registry == nil {
 				return errors.New("nil config, please configure first")
 			}
-			s.rsy = orion_consul.NewOrionConsulRegistry(s.c.Registry.Service, s.c.Registry.IP, s.c.Registry.Port)
+			s.rsy = consul.NewOrionConsulRegistry(s.c.Registry.Service, s.c.Registry.IP, s.c.Registry.Port)
 		}
 		return nil
 	}

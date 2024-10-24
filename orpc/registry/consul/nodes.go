@@ -1,4 +1,4 @@
-package orion_consul
+package consul
 
 type OrionNodesNotifyFunc = func(service string, nodes []OrionNode)
 

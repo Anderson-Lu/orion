@@ -6,7 +6,7 @@ import (
 
 	"github.com/Anderson-Lu/orion/orpc/client/balancer"
 	"github.com/Anderson-Lu/orion/orpc/codes"
-	"github.com/Anderson-Lu/orion/orpc/registry/orion_consul"
+	"github.com/Anderson-Lu/orion/orpc/registry/consul"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -15,7 +15,7 @@ type ConsulResovler struct {
 	address  string
 	conns    map[string]*ConsulResovlerConns
 	mu       sync.RWMutex
-	watchers *orion_consul.OrionConsulWatchers
+	watchers *consul.OrionConsulWatchers
 	b        balancer.Balancer
 }
 
@@ -29,7 +29,7 @@ func WithBalancer(b balancer.Balancer) ConsulResovlerOption {
 
 func NewConsulResovler(address string, opts ...ConsulResovlerOption) *ConsulResovler {
 	c := &ConsulResovler{address: address, conns: make(map[string]*ConsulResovlerConns)}
-	c.watchers = orion_consul.NewOrionConsulWatchers(c.address, c.notify)
+	c.watchers = consul.NewOrionConsulWatchers(c.address, c.notify)
 
 	for _, opt := range opts {
 		opt(c)
@@ -41,7 +41,7 @@ func NewConsulResovler(address string, opts ...ConsulResovlerOption) *ConsulReso
 	return c
 }
 
-func (c *ConsulResovler) notify(serviceName string, nodes []orion_consul.OrionNode) {
+func (c *ConsulResovler) notify(serviceName string, nodes []consul.OrionNode) {
 	addrs := []string{}
 	for _, v := range nodes {
 		key := fmt.Sprintf("%s:%d", v.Host, v.Port)

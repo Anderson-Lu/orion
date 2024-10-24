@@ -1,4 +1,4 @@
-package orion_consul
+package consul
 
 import (
 	"context"
@@ -9,6 +9,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+)
+
+var (
+	_ registry.IRegistry = (*OrionConsulRegistry)(nil)
 )
 
 type OrionConsulRegistry struct {
