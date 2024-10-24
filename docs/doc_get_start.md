@@ -2,7 +2,7 @@
 
 ## 1. 定义服务协议
 
-如: `example/proto/todo/todo.proto`
+如: `example/proto/todo/todo.proto`, 或者使用[orion-cli](doc_cli.md)快速创建服务模版.
 
 ```proto
 syntax = "proto3";

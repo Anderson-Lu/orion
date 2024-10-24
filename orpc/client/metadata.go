@@ -57,6 +57,9 @@ func (c *OrionRequestMeta) getCircuitKey() string {
 }
 
 func (c *OrionRequestMeta) wrapError(err error) {
+	if err == nil {
+		return
+	}
 	c.errs = append(c.errs, err)
 }
 

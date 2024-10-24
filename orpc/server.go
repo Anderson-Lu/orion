@@ -3,6 +3,7 @@ package orpc
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -234,13 +235,13 @@ func (s *Server) start() error {
 
 	if err := s.initGrpcServer(); err != nil {
 		s.frameLogger.Info("[Server] gRPC server init fail", "port", s.c.Server.Port, "err", err.Error())
-		return err
+		log.Fatal(err)
 	}
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.c.Server.Port))
 	if err != nil {
 		s.frameLogger.Info("[Server] gRPC server started fail", "port", s.c.Server.Port, "err", err.Error())
-		return err
+		log.Fatal(err)
 	}
 
 	// only grpc server
@@ -249,7 +250,7 @@ func (s *Server) start() error {
 		err = s.gServer.Serve(lis)
 		if err != nil {
 			s.frameLogger.Info("[Server] gRPC server started fail", "port", s.c.Server.Port, "err", err.Error())
-			return err
+			log.Fatal(err)
 		}
 		return nil
 	}
@@ -261,7 +262,7 @@ func (s *Server) start() error {
 	}
 	if err := s.gatewayFunc(context.Background(), s.gatewayMux, fmt.Sprintf(":%d", s.c.Server.Port), defaultGRPCOptions); err != nil {
 		s.frameLogger.Info("[Server] gRPC server started fail", "port", s.c.Server.Port, "err", err.Error())
-		return err
+		log.Fatal(err)
 	}
 
 	s.httpMux = http.NewServeMux()
@@ -282,7 +283,7 @@ func (s *Server) start() error {
 	}
 	if err := gwServer.Serve(lis); err != nil {
 		s.frameLogger.Info("[Server] gRPC gateway server started fail", "port", s.c.Server.Port, "err", err.Error())
-		return err
+		log.Fatal(err)
 	}
 	return nil
 }

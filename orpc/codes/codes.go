@@ -11,6 +11,7 @@ const (
 	ErrCodeNone                     = 0    // none
 	ErrCodeCircuitBreak             = 3001 // circuit breaked
 	ErrCodeClientConnNotEstablished = 3100 // client grpc connection not established
+	ErrCodeClientInvokeTimeout      = 3111 // client request timeout
 	ErrCodeUndefined                = 4000 // some errors not defined
 	ErrCodeRateLimited              = 4001 // ratelimit
 )
@@ -18,6 +19,7 @@ const (
 var (
 	ErrClientConnNotEstablished = WrapCodeFromError(errors.New("client conn not established yet"), ErrCodeClientConnNotEstablished)
 	ErrClientCircuitBreaked     = WrapCodeFromError(errors.New("circuit broken"), ErrCodeCircuitBreak)
+	ErrClientRequestTimeout     = WrapCodeFromError(errors.New("client request timeout"), ErrCodeClientInvokeTimeout)
 )
 
 func GetCodeFromError(err error) int {

@@ -10,7 +10,7 @@ import (
 var c int64 = time.Now().Unix()
 
 func (s *Service) Add(ctx context.Context, in *todo.AddReq) (*todo.AddRsp, error) {
-	s.l.Debug("invoke", "in", in)
+	time.Sleep(time.Second * 10)
 	// now := time.Now().Unix()
 	// gapSec := (now - c)
 

@@ -147,3 +147,20 @@ c := resolver.NewConsulResovler("127.0.0.1:8500",b) // 创建一个Consul服务�
 |:-|:-|
 |balancer.RoundRobinBalancer|轮询,默认模式|
 |balancer.Crc32HashBalancer|一致性哈希,需要注意IP漂移问题|
+
+# 7. 超时控制(Timeout)
+
+Orion不再单独提供超时相关的Option,直接通过context来实现超时控制.
+
+```go
+ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+defer cancel()
+
+err := cli.Invoke(ctx, req, rsp, opts...)
+```
+
+超时则按照GRPC的统一错误码返回对应的错误(code=4):
+
+```
+rpc error: code = DeadlineExceeded desc = context deadline exceeded
+```

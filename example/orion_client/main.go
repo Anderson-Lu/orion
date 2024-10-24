@@ -35,16 +35,18 @@ func main() {
 		options.WithJson(),
 		options.WithCircuitBreak(),
 		options.WithService("mine.namespace.demo"),
-		// options.WithDirectAddress("127.0.0.1:8080"),
+		options.WithDirectAddress("127.0.0.1:8080"),
 		options.WithMethod("/todo.UitTodo/Add"),
 		options.WithBalancerParams("xxx"),
 		options.WithHeaders("k1", "v1"),
 	}
 
 	for i := 0; i < 1000; i++ {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		req := &AddReq{Item: &TodoItem{Id: "1"}}
 		rsp := &AddRsp{}
-		err := cli.Invoke(context.Background(), req, rsp, opts...)
+		err := cli.Invoke(ctx, req, rsp, opts...)
+		cancel()
 		time.Sleep(time.Millisecond * 300)
 		fmt.Println("rsp", rsp, "err", err)
 	}

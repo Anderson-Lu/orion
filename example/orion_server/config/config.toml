@@ -1,19 +1,18 @@
 [Server]
-Port = 8080
+Port = 8_080
 EnableGRPCGateway = true
-
-[Registry]
-Service = "mine.namespace.demo"
-IP = "127.0.0.1"
-Port = 8500
 
 [PromtheusConfig]
 Enable = true
-Port = 9092
+Port = 9_092
 
 [FrameLogger]
 Path = "../log/frame.log"
 LogLevel = "info"
+LogFileMaxSizeMB = 10
+LogFileMaxBackups = 10
+LogMaxAgeDays = 10
+LogCompress = false
 
 [AccessLogger]
 Path = "../log/access.log"
@@ -23,6 +22,11 @@ Path = "../log/panic.log"
 
 [ServiceLogger]
 Path = "../log/service.log"
+
+[Registry]
+Service = "mine.namespace.demo"
+IP = "127.0.0.1"
+Port = 8_500
 
 [[RateLimit]]
 Key = "/todo.UitTodo/Add"
