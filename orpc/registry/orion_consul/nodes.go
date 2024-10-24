@@ -1,6 +1,6 @@
 package orion_consul
 
-type OrionNodesNotifyFunc func(nodes []OrionNode)
+type OrionNodesNotifyFunc = func(service string, nodes []OrionNode)
 
 type OrionNode struct {
 	Namespace   string

@@ -2,12 +2,12 @@ package client
 
 import (
 	"context"
-	"errors"
 
 	"github.com/Anderson-Lu/orion/orpc/client/options"
 	"github.com/Anderson-Lu/orion/orpc/client/resolver"
 	"github.com/Anderson-Lu/orion/orpc/codes"
 	"github.com/Anderson-Lu/orion/pkg/circuit_break"
+	"google.golang.org/grpc"
 )
 
 func New(rsv resolver.IResolver) (*OrionClient, error) {
@@ -32,37 +32,39 @@ func (o *OrionClient) RegisterCircuitBreakRule(ruleConfigs ...*circuit_break.Rul
 	}
 }
 
-func (o *OrionClient) Invoke(ctx context.Context, method string, req, rsp interface{}, opts ...options.OrionClientInvokeOption) error {
+func (o *OrionClient) Invoke(ctx context.Context, req, rsp interface{}, opts ...options.OrionClientInvokeOption) error {
 
-	oCtx := newContext(ctx, opts...)
-	if err := o.checkBreak(oCtx, method); err != nil {
-		return o.after(oCtx, method, req, rsp)
-	}
+	meta := newOrionRequestMeta(ctx, req, rsp, opts...)
 
-	conn, err := o.rsv.Select(method)
-	if err != nil {
-		return o.after(oCtx, method, req, rsp)
-	}
-
-	oCtx.err = conn.Invoke(oCtx.ctx, method, req, rsp, oCtx.options()...)
-	return o.after(oCtx, method, req, rsp)
-}
-
-func (o *OrionClient) checkBreak(ctx *Context, method string) error {
-
-	if ok := ctx.matchBreaker(); o.breaker != nil && ok {
-		if canPass := o.breaker.Pass(method); !canPass {
-			ctx.err = codes.WrapCodeFromError(errors.New("circuit break"), codes.ErrCodeCircuitBreak)
-			return ctx.err
+	if circuitKey := meta.getCircuitKey(); o.breaker != nil && circuitKey != "" {
+		if canPass := o.breaker.Pass(circuitKey); !canPass {
+			meta.wrapError(codes.ErrClientCircuitBreaked)
+			return o.after(meta)
 		}
 	}
-	return nil
+
+	var conn *grpc.ClientConn
+	var err error
+	if meta.directEnable {
+		drsv := resolver.NewDirectResolver(meta.direct)
+		conn, err = drsv.Select(meta.resolverKey)
+	} else {
+		conn, err = o.rsv.Select(meta.resolverKey)
+	}
+
+	if err != nil {
+		meta.wrapError(err)
+		return o.after(meta)
+	}
+
+	meta.wrapError(conn.Invoke(meta.ctx, meta.method, req, rsp, meta.callOptions...))
+	return o.after(meta)
 }
 
-func (o *OrionClient) after(ctx *Context, method string, req, rsp interface{}) error {
-	reqCost := ctx.cost()
-	if ok := ctx.matchBreaker(); ok && o.breaker != nil && codes.GetCodeFromError(ctx.err) != codes.ErrCodeCircuitBreak {
-		o.breaker.Report(method, ctx.err == nil, int64(reqCost))
+func (o *OrionClient) after(meta *OrionRequestMeta) error {
+	reqCost := meta.cost()
+	if circuitKey := meta.getCircuitKey(); o.breaker != nil && circuitKey != "" && codes.GetCodeFromError(meta.err()) != codes.ErrCodeCircuitBreak {
+		o.breaker.Report(circuitKey, len(meta.errs) == 0, int64(reqCost))
 	}
-	return ctx.err
+	return meta.err()
 }

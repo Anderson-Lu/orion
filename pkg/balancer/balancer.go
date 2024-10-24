@@ -5,12 +5,12 @@ import "sync/atomic"
 type Balancer interface {
 	Get(params ...interface{}) int
 	Update(index int)
+	Resize(size int)
+	Copy() Balancer
 }
 
-func NewDefaultBalancer(size int) *DefaultBalancer {
-	return &DefaultBalancer{
-		size: size,
-	}
+func NewDefaultBalancer() *DefaultBalancer {
+	return &DefaultBalancer{}
 }
 
 type DefaultBalancer struct {
@@ -32,3 +32,14 @@ func (e *DefaultBalancer) Get(params ...interface{}) int {
 }
 
 func (e *DefaultBalancer) Update(index int) {}
+
+func (e *DefaultBalancer) Resize(size int) {
+	if size < 0 {
+		return
+	}
+	e.size = size
+}
+
+func (e *DefaultBalancer) Copy() Balancer {
+	return &DefaultBalancer{size: e.size}
+}

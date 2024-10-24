@@ -7,6 +7,7 @@ const (
 	OptionTypeBalanceOption      OptionType = 2
 	OptionTypeCircuitBreakOption OptionType = 3
 	OptionTypeResovler           OptionType = 4
+	OptionTYpeMethod             OptionType = 5
 )
 
 type OrionClientInvokeOption interface {

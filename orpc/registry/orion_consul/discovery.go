@@ -90,7 +90,7 @@ func (o *OrionConsulWatcher) init() error {
 					Tags:        v.Service.Tags,
 				})
 				if o.notifyFunc != nil {
-					o.notifyFunc(nodes)
+					o.notifyFunc(o.service, nodes)
 				}
 			}
 		}

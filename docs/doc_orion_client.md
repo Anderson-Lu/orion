@@ -6,17 +6,6 @@ import "github.com/Anderson-Lu/orion/orpc/client"
 cli, err := client.New(resolver)
 ```
 
-配置项:
-
-```go
-type OrionClientConfig struct {
-  Host               string // server
-  DailTimeout        int64  // milliseconds
-  ConnectionNum      int64  // if set to zero, ConnectionNum = 1 will be set.
-  ConnectionBalancer string // can be set to "random" or "hash", if not set, random balancer will be set by default.
-}
-```
-
 # 使用Json协议发起grpc请求
 
 - 客户端在调用的时候支持编码器`client.WithJson()`
@@ -37,32 +26,6 @@ if err := cli.Invoke(ctx, "your method desc", req, rsp, client.WithJson()); err 
 ```go
 import _ "github.com/Anderson-Lu/orion/orpc/codec"
 ```
-
-# 主调侧GRPC长链接Balancer
-
-Orion支持在主调侧设置需要创建的长链接(拨号连接)数量,注意,这里不用传统意义上的连接池, 原因如下:
-
-- GRPC连接本身是基于http2的,本身有多路复用等特性,client本身也有有重试、断线重连的能力,因此连接池的作用其实不大.
-- 如果采用连接池,在一些特定场景之下,会影响负载均衡的实现.
-
-因此,Orion只对连接对象做简单的LB设置, 比如可以创建n个长链接对象,并通过不同均衡器(`ConnectionBalancer选项`)使用不同的连接进行调用.
-
-Orion客户端支持三种Balancer:
-
-- 随机`random`,在已创建的连接中随机选择一个.
-- 哈希`hash`,通过指定字段固定映射到一个连接.
-- 默认`default`, 轮转的方式, 每次调用依次选择.
-
-其中, 如果选择了哈希模式, 则在调用过程中需要指定需要进行哈希计算的数据:
-
-```go
-// 需要指定进行hash的字段: client.WithHash("uid")
-if err := cli.Invoke(ctx, "/todo.UitTodo/Add", req, rsp, client.WithHash("uid")); err != nil {
-  panic(err)
-}
-```
-
-注意, 当前的**Balancer**只吃对**本地**GRPC长链接对象的均衡分发策略, 非被调端的负载均衡.一般情况下,只需要维持一个长链接即可满足普通的业务需求.
 
 # 主调侧熔断器
 
@@ -108,3 +71,73 @@ type IResolver interface {
 ```
 
 因此,业务可以实现自己的微服务服务发现逻辑,从而保证Orion框架的灵活性和扩展性. 目前,内置了直连模式(DirectResolver)和Consul模式(ConsulResover)
+
+## 直连IP模式(DirectResolver)
+
+```go
+// 127.0.0.1:8080是GRPC服务端的服务端口和地址,resolver.NewDirectResolver()表示通过直连方式实现服务发现
+cli, err := client.New(resolver.NewDirectResolver("127.0.0.1:8080"))
+
+// 请求选项
+opts := []options.OrionClientInvokeOption{
+  options.WithMethod("/todo.UitTodo/Add"),
+}
+
+// 执行请求
+err := cli.Invoke(context.Background(), req, rsp, opts...)
+```
+
+## Consul服务发现模式(ConsulResover)
+
+```go
+// 127.0.0.1:8500是consul agent的IP和端口, resolver.NewConsulResovler表示通过consul方式实现动态服务发现
+cli, err := client.New(resolver.NewConsulResovler("127.0.0.1:8500"))
+
+// 请求选项
+opts := []options.OrionClientInvokeOption{
+  // 表示要进行寻址的微服务名(微服务ID)
+  options.WithService("mine.namespace.demo"),
+  options.WithMethod("/todo.UitTodo/Add"),
+}
+
+// 执行请求
+err := cli.Invoke(context.Background(), req, rsp, opts...)
+```
+
+# 请求选项(OrionClientInvokeOption)
+
+Orion内置了很多请求选项, 业务按需调用即可:
+
+```go
+import "github.com/Anderson-Lu/orion/orpc/client/options"
+```
+
+|选项|功能|
+|:-|:-|
+|`options.WithJson()`|表示请求体的序列化协议为json,开启此项需要服务端支持(Orion服务端默认开启),否则默认使用proto协议进行序列化|
+|`options.WithCircuitBreak()`|表示该请求接入熔断检测,需要前置注册对应的熔断器(cli.RegisterCircuitBreakRule())|
+|`options.WithService()`|表示通过微服务名进行寻址,需要前置指定对应的resolver为非直连方式|
+|`options.WithMethod()`|表示要调用的方法名,指pb生成后的完整PathDesc|
+|`options.WithDirectAddress()`|表示本次请求直接通过指定的地址访问,如一些调试环境,需要指定特定IP/端口时|
+|`options.WithHeaders()`|将kv添加到OutGoingMetadata里面|
+
+# 主调侧GRPC长链接Balancer
+
+Orion支持在主调侧设置需要服务发现的负载均衡器,注意,这里不用传统意义上的连接池, 原因如下:
+
+- GRPC连接本身是基于http2的,本身有多路复用等特性,client本身也有有重试、断线重连的能力,因此连接池的作用其实不大.
+- 如果采用连接池,在一些特定场景之下,会影响负载均衡的实现.
+
+Orion客户端支持三种Balancer:
+
+- 随机`random`,在已创建的连接中随机选择一个.
+- 哈希`hash`,通过指定字段固定映射到一个连接.
+- 默认`default`, 轮转的方式, 每次调用依次选择.
+
+当前Orion客户端默认使用随机LB策略(balancer.DefaultBalancer)来充当服务发现后的连接选择决策.如果要通过其他LB策略,则需要在创建对应resolver对象时指定,如`ConsulResovler`
+
+```go
+b := balancer.NewDefaultBalancer() // 创建一个默认的随机LB
+c := resolver.NewConsulResovler("127.0.0.1:8500",b) // 创建一个Consul服务发现客户端,并指定LB策略为随机
+```
+

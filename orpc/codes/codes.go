@@ -1,16 +1,23 @@
 package codes
 
 import (
+	"errors"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 const (
-	ErrCodeNone         = 0    // none
-	ErrCodeCircuitBreak = 3001 // circuit breaked
-	ErrCodeUndefined    = 4000 // some errors not defined
-	ErrCodeRateLimited  = 4001 // ratelimit
+	ErrCodeNone                     = 0    // none
+	ErrCodeCircuitBreak             = 3001 // circuit breaked
+	ErrCodeClientConnNotEstablished = 3100 // client grpc connection not established
+	ErrCodeUndefined                = 4000 // some errors not defined
+	ErrCodeRateLimited              = 4001 // ratelimit
+)
 
+var (
+	ErrClientConnNotEstablished = WrapCodeFromError(errors.New("client conn not established yet"), ErrCodeClientConnNotEstablished)
+	ErrClientCircuitBreaked     = WrapCodeFromError(errors.New("circuit broken"), ErrCodeCircuitBreak)
 )
 
 func GetCodeFromError(err error) int {
