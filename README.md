@@ -21,6 +21,7 @@
 - [Orion-Cli脚手架](./docs/doc_cli.md) 
 - [Orion错误码](./orpc/codes/codes.go)
 - [Orion DevOps实践](./docs/doc_get_start.md)
+- [Orion可观测性](./docs/doc_tracing.md)
 
 ## Orion优雅编程
 
