@@ -55,3 +55,16 @@ RateLimit:
    Cap: 1
    # 令牌桶发放的速度
    TokensPerSecond: 1
+
+# 全链路追踪配置
+Tracing:
+  # OpenTelemetry Collector的地址
+  Address: "127.0.0.1:4317" 
+  # 业务命名空间
+  Namespace: "robot_team"
+  # 当前服务的微服务名
+  ServiceName: "orion.server"
+  # 实例ID
+  InstanceId: "orion.server.instance"
+  # 环境
+  Env: "Test"

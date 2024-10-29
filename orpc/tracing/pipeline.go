@@ -9,7 +9,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 
-	strace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace"
 	ot "go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -30,7 +30,7 @@ type Tracing struct {
 	metricProvider *metric.MeterProvider
 
 	traceExportor *otlptrace.Exporter
-	traceProvider *strace.TracerProvider
+	traceProvider *trace.TracerProvider
 
 	baseResources *Resources
 }
@@ -83,8 +83,8 @@ func (p *Tracing) initProvider() error {
 	if err != nil {
 		return err
 	}
-	traceProcessor := strace.NewBatchSpanProcessor(p.traceExportor)
-	p.traceProvider = strace.NewTracerProvider(strace.WithSampler(strace.AlwaysSample()), strace.WithSpanProcessor(traceProcessor), strace.WithResource(rso))
+	traceProcessor := trace.NewBatchSpanProcessor(p.traceExportor)
+	p.traceProvider = trace.NewTracerProvider(trace.WithSampler(trace.AlwaysSample()), trace.WithSpanProcessor(traceProcessor), trace.WithResource(rso))
 	p.metricProvider = metric.NewMeterProvider(metric.WithReader(metric.NewPeriodicReader(p.metricExportor)), metric.WithResource(rso))
 	return nil
 }
@@ -104,7 +104,19 @@ func (p *Tracing) Shutdown(ctx context.Context) {
 	p.metricProvider.Shutdown(ctx)
 }
 
-func (p *Tracing) Span(ctx context.Context, spanName string, attrKvs ...string) (context.Context, ot.Span) {
+func (p *Tracing) SpanClient(ctx context.Context, spanName string, attrKvs ...string) (context.Context, ot.Span) {
+	return p.Span(ctx, spanName, ot.SpanKindClient, attrKvs...)
+}
+
+func (p *Tracing) Span(ctx context.Context, spanName string, spanKind ot.SpanKind, attrKvs ...string) (context.Context, ot.Span) {
+	tc := NewTraceContext(ctx)
+	if len(tc.TraceId) == 16 {
+		// check trace id format to ot.TraceID, need [16]byte
+		ctx = ot.ContextWithRemoteSpanContext(tc.ToSpanContext(ctx), ot.NewSpanContext(ot.SpanContextConfig{
+			TraceID: ot.TraceID([]byte(tc.TraceId)),
+		}))
+	}
+
 	kvs := []attribute.KeyValue{}
 	if len(attrKvs)%2 == 0 {
 		for i := 0; i < len(attrKvs); i += 2 {
@@ -114,5 +126,5 @@ func (p *Tracing) Span(ctx context.Context, spanName string, attrKvs ...string) 
 			})
 		}
 	}
-	return p.tracer.Start(ctx, spanName, ot.WithAttributes(kvs...))
+	return p.tracer.Start(ctx, spanName, ot.WithAttributes(kvs...), ot.WithSpanKind(spanKind))
 }

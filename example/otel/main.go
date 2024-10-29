@@ -29,12 +29,12 @@ func main() {
 	p.Start()
 	defer p.Shutdown(ctx)
 
-	ctx1, span1 := p.Span(ctx, "precheck", "callee.service", "被调1")
+	ctx1, span1 := p.SpanClient(ctx, "precheck", "callee.service", "被调1")
 	time.Sleep(time.Second)
 	span1.SetStatus(codes.Error, "error occuro, 遇到错误了")
 	span1.End()
 
-	_, span2 := p.Span(ctx1, "被调2")
+	_, span2 := p.SpanClient(ctx1, "被调2")
 	time.Sleep(time.Second)
 	span2.End()
 

@@ -32,3 +32,10 @@ Port = 8_500
 Key = "/todo.UitTodo/Add"
 Cap = 1
 TokensPerSecond = 1
+
+[Tracing]
+Address = "127.0.0.1:4317"
+Namespace = "robot_team"
+ServiceName = "mine.namespace.demo"
+InstanceId = "mine.namespace.demo"
+Env = "Test"

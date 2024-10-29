@@ -16,6 +16,7 @@ import (
 	"github.com/Anderson-Lu/orion/orpc/interceptors"
 	"github.com/Anderson-Lu/orion/orpc/registry"
 	"github.com/Anderson-Lu/orion/orpc/registry/consul"
+	"github.com/Anderson-Lu/orion/orpc/tracing"
 
 	"github.com/Anderson-Lu/orion/pkg/logger"
 	"github.com/Anderson-Lu/orion/pkg/utils"
@@ -62,6 +63,8 @@ type Server struct {
 	rsy  registry.IRegistry
 	sig  chan os.Signal
 	gsig chan any
+
+	trace *tracing.Tracing
 }
 
 func New(opts ...ServerOption) (*Server, error) {
@@ -78,8 +81,38 @@ func New(opts ...ServerOption) (*Server, error) {
 		return nil, err
 	}
 
+	if err := s.initTracing(); err != nil {
+		return nil, err
+	}
+
 	s.grpcOpts = defaultGRPCOptions
 	return s, nil
+}
+
+func (s *Server) Tracing() *tracing.Tracing {
+	return s.trace
+}
+
+func (s *Server) initTracing() error {
+	if s.c.Tracing == nil {
+		return nil
+	}
+
+	bs := &tracing.Resources{}
+	bs.Env(s.c.Tracing.Env)
+	bs.Namespace(s.c.Tracing.Namespace)
+	bs.IP(utils.IP().GetLocalIP())
+	bs.ServiceName(s.c.Tracing.ServiceName)
+	bs.InstanceId(s.c.Tracing.InstanceId)
+
+	tr, err := tracing.NewTracing(s.c.Tracing.ServiceName, tracing.WithOpenTelemetryAddress(s.c.Tracing.Address), tracing.WithResource(bs))
+	if err != nil {
+		return err
+	}
+	s.trace = tr
+	s.trace.Start()
+
+	return nil
 }
 
 func (s *Server) initOptions(opts ...ServerOption) error {
@@ -217,6 +250,9 @@ func (s *Server) stop(info any) {
 
 	if s.rsy != nil {
 		s.rsy.RemoveNode(context.Background())
+	}
+	if s.trace != nil {
+		s.trace.Shutdown(context.Background())
 	}
 }
 

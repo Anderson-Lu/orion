@@ -11,6 +11,7 @@ const (
 	KEY_RESOURCE_INSTANCE_ID  = "service.instance.id"
 	KEY_RESOURCE_INSTANCE_IP  = "service.instance.ip"
 	KEY_SPAN_ERRCODE          = "span.code"
+	KEY_SPAN_KIND             = "span.kind"
 )
 
 type Resources struct {
@@ -49,5 +50,12 @@ func (m *Resources) Namespace(namespace string) {
 	m.kvs = append(m.kvs, attribute.KeyValue{
 		Key:   KEY_RESOURCE_NAMESPACE,
 		Value: attribute.StringValue(namespace),
+	})
+}
+
+func (m *Resources) KindClient() {
+	m.kvs = append(m.kvs, attribute.KeyValue{
+		Key:   KEY_SPAN_KIND,
+		Value: attribute.StringValue("client"),
 	})
 }

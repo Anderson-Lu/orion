@@ -45,7 +45,8 @@ func (o *OrionClient) Invoke(ctx context.Context, req, rsp interface{}, opts ...
 
 	meta := newOrionRequestMeta(ctx, req, rsp, opts...)
 	if o.trace != nil {
-		ctx, meta.span = o.trace.Span(ctx, meta.method)
+		meta.ctx, meta.span = o.trace.SpanClient(ctx, meta.method)
+		meta.headers.Set(tracing.KEY_HEADER_TRACE_ID, meta.span.SpanContext().TraceID().String())
 	}
 
 	if circuitKey := meta.getCircuitKey(); o.breaker != nil && circuitKey != "" {

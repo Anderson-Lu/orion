@@ -18,7 +18,7 @@ func main() {
 
 	handler, _ := service.NewService(c)
 	server, err := orpc.New(
-		orpc.WithConfigFile("../config/config.toml"),
+		orpc.WithConfigFile("../config/config.yaml"),
 		orpc.WithGRPCHandler(handler, &todo.UitTodo_ServiceDesc),
 		orpc.WithGrpcGatewayEndpointFunc(todo.RegisterUitTodoHandlerFromEndpoint),
 		orpc.WithFlags(),
@@ -27,6 +27,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	handler.SetTracing(server.Tracing())
 
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)

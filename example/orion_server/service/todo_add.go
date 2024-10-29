@@ -6,9 +6,16 @@ import (
 	"time"
 
 	"github.com/Anderson-Lu/orion/example/orion_server/proto_go/proto/todo"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func (s *Service) Add(ctx context.Context, in *todo.AddReq) (*todo.AddRsp, error) {
+
+	var span trace.Span
+
+	if s.t != nil {
+		_, span = s.t.SpanClient(ctx, "server_handle1")
+	}
 	// time.Sleep(time.Second * 10)
 	// now := time.Now().Unix()
 	// gapSec := (now - c)
@@ -19,5 +26,7 @@ func (s *Service) Add(ctx context.Context, in *todo.AddReq) (*todo.AddRsp, error
 	// if needMockFail {
 	// return &todo.AddRsp{}, errors.New("mock error")
 	// }
+
+	span.End()
 	return &todo.AddRsp{Msg: "ok"}, nil
 }

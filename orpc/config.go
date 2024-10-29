@@ -24,10 +24,19 @@ type Config struct {
 	ServiceLogger   *logger.LoggerConfig `yaml:"ServiceLogger" json:"ServiceLogger" toml:"ServiceLogger"`
 	PanicLogger     *logger.LoggerConfig `yaml:"PanicLogger" json:"PanicLogger" toml:"PanicLogger"`
 	RateLimit       []*ratelimit.Config  `yaml:"RateLimit" json:"RateLimit" toml:"RateLimit"`
+	Tracing         *TracingConfig       `yaml:"Tracing" json:"Tracing" toml:"Tracing"`
 }
 
 type Registry struct {
 	Service string `yaml:"Service" json:"Service" toml:"Service"`
 	IP      string `yaml:"IP" json:"IP" toml:"IP"`
 	Port    uint32 `yaml:"Port" json:"Port" toml:"Port"`
+}
+
+type TracingConfig struct {
+	Address     string `yaml:"Address" json:"Address" toml:"Address"`
+	Namespace   string `yaml:"Namespace" json:"Namespace" toml:"Namespace"`
+	ServiceName string `yaml:"ServiceName" json:"ServiceName" toml:"ServiceName"`
+	InstanceId  string `yaml:"InstanceId" json:"InstanceId" toml:"InstanceId"`
+	Env         string `yaml:"Env" json:"Env" toml:"Env"`
 }
