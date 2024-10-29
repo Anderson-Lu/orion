@@ -2,11 +2,15 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Anderson-Lu/orion/orpc/client/options"
 	"github.com/Anderson-Lu/orion/orpc/client/resolver"
 	"github.com/Anderson-Lu/orion/orpc/codes"
+	"github.com/Anderson-Lu/orion/orpc/tracing"
 	"github.com/Anderson-Lu/orion/pkg/circuit_break"
+	"go.opentelemetry.io/otel/attribute"
+	oCodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc"
 )
 
@@ -21,6 +25,11 @@ func New(rsv resolver.IResolver) (*OrionClient, error) {
 type OrionClient struct {
 	rsv     resolver.IResolver
 	breaker *circuit_break.CircuitBreaker
+	trace   *tracing.Tracing
+}
+
+func (o *OrionClient) RegisterTracing(trace *tracing.Tracing) {
+	o.trace = trace
 }
 
 func (o *OrionClient) RegisterCircuitBreakRule(ruleConfigs ...*circuit_break.RuleConfig) {
@@ -35,6 +44,9 @@ func (o *OrionClient) RegisterCircuitBreakRule(ruleConfigs ...*circuit_break.Rul
 func (o *OrionClient) Invoke(ctx context.Context, req, rsp interface{}, opts ...options.OrionClientInvokeOption) error {
 
 	meta := newOrionRequestMeta(ctx, req, rsp, opts...)
+	if o.trace != nil {
+		ctx, meta.span = o.trace.Span(ctx, meta.method)
+	}
 
 	if circuitKey := meta.getCircuitKey(); o.breaker != nil && circuitKey != "" {
 		if canPass := o.breaker.Pass(circuitKey); !canPass {
@@ -66,5 +78,15 @@ func (o *OrionClient) after(meta *OrionRequestMeta) error {
 	if circuitKey := meta.getCircuitKey(); o.breaker != nil && circuitKey != "" && codes.GetCodeFromError(meta.err()) != codes.ErrCodeCircuitBreak {
 		o.breaker.Report(circuitKey, len(meta.errs) == 0, int64(reqCost))
 	}
+	code, msg := codes.GetCodeAndMessageFromError(meta.err())
+	fmt.Println("code", code, "msg", msg)
+	if code != 0 {
+		meta.span.SetStatus(oCodes.Error, msg)
+		meta.span.SetAttributes(attribute.KeyValue{
+			Key:   attribute.Key(tracing.KEY_SPAN_ERRCODE),
+			Value: attribute.IntValue(code),
+		})
+	}
+	meta.span.End()
 	return meta.err()
 }

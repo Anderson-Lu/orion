@@ -44,6 +44,17 @@ func GetCodeAndMessageFromError(err error) (int, string) {
 	return int(st.Code()), st.Message()
 }
 
+func GetRPCCodeAndMessageFromError(err error) (codes.Code, string) {
+	if err == nil {
+		return 0, ""
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		return ErrCodeUndefined, "undefined error:" + err.Error()
+	}
+	return st.Code(), st.Message()
+}
+
 func WrapCodeFromError(err error, code int) error {
 	if err == nil {
 		return nil

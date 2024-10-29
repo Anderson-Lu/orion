@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Anderson-Lu/orion/orpc/client/options"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -35,6 +36,9 @@ type OrionRequestMeta struct {
 	req         interface{}
 	rsp         interface{}
 	callOptions []grpc.CallOption
+
+	// tracing
+	span trace.Span
 }
 
 func (c *OrionRequestMeta) err() error {
