@@ -109,12 +109,10 @@ func (p *Tracing) SpanClient(ctx context.Context, spanName string, attrKvs ...st
 }
 
 func (p *Tracing) Span(ctx context.Context, spanName string, spanKind ot.SpanKind, attrKvs ...string) (context.Context, ot.Span) {
+
 	tc := NewTraceContext(ctx)
-	if len(tc.TraceId) == 16 {
-		// check trace id format to ot.TraceID, need [16]byte
-		ctx = ot.ContextWithRemoteSpanContext(tc.ToSpanContext(ctx), ot.NewSpanContext(ot.SpanContextConfig{
-			TraceID: ot.TraceID([]byte(tc.TraceId)),
-		}))
+	if len(tc.TraceId) > 16 {
+		ctx = tc.ToSpanContext(ctx)
 	}
 
 	kvs := []attribute.KeyValue{}
@@ -126,5 +124,6 @@ func (p *Tracing) Span(ctx context.Context, spanName string, spanKind ot.SpanKin
 			})
 		}
 	}
+
 	return p.tracer.Start(ctx, spanName, ot.WithAttributes(kvs...), ot.WithSpanKind(spanKind))
 }

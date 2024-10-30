@@ -34,7 +34,7 @@ type TraceContext struct {
 }
 
 func (tc *TraceContext) ToSpanContext(ctx context.Context) context.Context {
-	if len(tc.TraceId) != 16 || len(tc.SpanId) != 8 {
+	if len(tc.TraceId) < 16 || len(tc.SpanId) < 8 {
 		return context.Background()
 	}
 	ox := ot.NewSpanContext(ot.SpanContextConfig{

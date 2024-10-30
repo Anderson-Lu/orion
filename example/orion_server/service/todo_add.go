@@ -14,7 +14,7 @@ func (s *Service) Add(ctx context.Context, in *todo.AddReq) (*todo.AddRsp, error
 	var span trace.Span
 
 	if s.t != nil {
-		_, span = s.t.SpanClient(ctx, "server_handle1")
+		_, span = s.t.SpanClient(ctx, "服务端处理逻辑")
 	}
 	// time.Sleep(time.Second * 10)
 	// now := time.Now().Unix()

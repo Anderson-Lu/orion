@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Anderson-Lu/orion/orpc/client/options"
 	"github.com/Anderson-Lu/orion/orpc/client/resolver"
@@ -47,6 +46,7 @@ func (o *OrionClient) Invoke(ctx context.Context, req, rsp interface{}, opts ...
 	if o.trace != nil {
 		meta.ctx, meta.span = o.trace.SpanClient(ctx, meta.method)
 		meta.headers.Set(tracing.KEY_HEADER_TRACE_ID, meta.span.SpanContext().TraceID().String())
+		meta.headers.Set(tracing.KEY_HEADER_SPAN_ID, meta.span.SpanContext().SpanID().String())
 	}
 
 	if circuitKey := meta.getCircuitKey(); o.breaker != nil && circuitKey != "" {
@@ -79,15 +79,21 @@ func (o *OrionClient) after(meta *OrionRequestMeta) error {
 	if circuitKey := meta.getCircuitKey(); o.breaker != nil && circuitKey != "" && codes.GetCodeFromError(meta.err()) != codes.ErrCodeCircuitBreak {
 		o.breaker.Report(circuitKey, len(meta.errs) == 0, int64(reqCost))
 	}
-	code, msg := codes.GetCodeAndMessageFromError(meta.err())
-	fmt.Println("code", code, "msg", msg)
-	if code != 0 {
-		meta.span.SetStatus(oCodes.Error, msg)
+
+	if meta.span != nil {
+		code, msg := codes.GetCodeAndMessageFromError(meta.err())
+		if code != 0 {
+			meta.span.SetStatus(oCodes.Error, msg)
+		}
 		meta.span.SetAttributes(attribute.KeyValue{
 			Key:   attribute.Key(tracing.KEY_SPAN_ERRCODE),
 			Value: attribute.IntValue(code),
+		}, attribute.KeyValue{
+			Key:   attribute.Key(tracing.KEY_UNI_TRACE_ID),
+			Value: attribute.StringValue(meta.span.SpanContext().TraceID().String()),
 		})
+		meta.span.End()
 	}
-	meta.span.End()
+
 	return meta.err()
 }

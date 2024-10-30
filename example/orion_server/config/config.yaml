@@ -63,8 +63,8 @@ Tracing:
   # 业务命名空间
   Namespace: "robot_team"
   # 当前服务的微服务名
-  ServiceName: "orion.server"
+  ServiceName: "orion.server1"
   # 实例ID
-  InstanceId: "orion.server.instance"
+  InstanceId: "orion.server1.instance"
   # 环境
   Env: "Test"

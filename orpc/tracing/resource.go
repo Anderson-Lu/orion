@@ -5,13 +5,14 @@ import (
 )
 
 const (
-	KEY_RESOURCE_ENV          = "deployment.environment"
-	KEY_RESOURCE_NAMESPACE    = "deployment.namespace"
 	KEY_RESOURCE_SERVICE_NAME = "service.name"
-	KEY_RESOURCE_INSTANCE_ID  = "service.instance.id"
-	KEY_RESOURCE_INSTANCE_IP  = "service.instance.ip"
-	KEY_SPAN_ERRCODE          = "span.code"
 	KEY_SPAN_KIND             = "span.kind"
+	KEY_RESOURCE_INSTANCE_ID  = "orion.instance.id"
+	KEY_RESOURCE_INSTANCE_IP  = "orion.instance.ip"
+	KEY_SPAN_ERRCODE          = "orion.code"
+	KEY_RESOURCE_ENV          = "orion.environment"
+	KEY_RESOURCE_NAMESPACE    = "orion.namespace"
+	KEY_UNI_TRACE_ID          = "orion.traceid"
 )
 
 type Resources struct {
@@ -50,6 +51,13 @@ func (m *Resources) Namespace(namespace string) {
 	m.kvs = append(m.kvs, attribute.KeyValue{
 		Key:   KEY_RESOURCE_NAMESPACE,
 		Value: attribute.StringValue(namespace),
+	})
+}
+
+func (m *Resources) TradeId(tradeId string) {
+	m.kvs = append(m.kvs, attribute.KeyValue{
+		Key:   KEY_UNI_TRACE_ID,
+		Value: attribute.StringValue(tradeId),
 	})
 }
 
