@@ -11,6 +11,7 @@ import (
 	"github.com/Anderson-Lu/orion/orpc/client/resolver"
 	"github.com/Anderson-Lu/orion/orpc/tracing"
 	"github.com/Anderson-Lu/orion/pkg/circuit_break"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func main() {
@@ -34,23 +35,28 @@ func main() {
 	})
 
 	bs := &tracing.Resources{}
-	bs.Env("test")
-	bs.IP("9.134.188.178")
-	bs.InstanceId("local")
-	bs.ServiceName("客户端")
-	bs.Namespace("gz")
+	bs.SetEnv("test")
+	bs.SetIP("9.134.188.178")
+	bs.SetInstanceId("local")
+	bs.SetNamespace("gz")
+	bs.SetServiceName("10-30-client")
 
-	tr, err := tracing.NewTracing("orion.client_demo", tracing.WithOpenTelemetryAddress("127.0.0.1:4317"), tracing.WithResource(bs))
+	tr, err := tracing.NewTracing(tracing.WithOpenTelemetryAddress("127.0.0.1:4317"), tracing.WithResource(bs))
 	if err != nil {
 		panic(err)
 	}
+
 	tr.Start()
 	defer tr.Shutdown(context.Background())
 
-	// cli.RegisterTracing(tr)
+	cli.RegisterTracing(tr)
 	if err != nil {
 		panic(err)
 	}
+
+	var rootSpan trace.Span
+	rootCtx, rootSpan := tr.InternalSpan(context.Background(), "client-root-span")
+	defer rootSpan.End()
 
 	opts := []options.OrionClientInvokeOption{
 		options.WithJson(),
@@ -62,13 +68,15 @@ func main() {
 		options.WithHeaders("k1", "v1"),
 	}
 
-	for i := 0; i < 1; i++ {
+	req := &AddReq{Item: &TodoItem{Id: "1"}}
+	rsp := &AddRsp{}
+	orionRequest := client.NewOrionRequest(rootCtx, req, rsp, opts...)
+	err = cli.Do(orionRequest)
+	fmt.Println("rsp", rsp, "err", err)
 
-		req := &AddReq{Item: &TodoItem{Id: "1"}}
-		rsp := &AddRsp{}
-		err := cli.Invoke(context.Background(), req, rsp, opts...)
+	_, span2 := cli.GetTracing().InternalSpan(rootCtx, "client handle")
+	time.Sleep(time.Millisecond * 100)
+	span2.End()
 
-		fmt.Println("rsp", rsp, "err", err)
-	}
-	time.Sleep(time.Millisecond * 30000)
+	time.Sleep(time.Millisecond * 1000)
 }

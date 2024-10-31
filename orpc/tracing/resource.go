@@ -19,51 +19,37 @@ type Resources struct {
 	kvs []attribute.KeyValue
 }
 
-func (m *Resources) Env(env string) {
+func (m *Resources) SetEnv(env string) {
 	m.kvs = append(m.kvs, attribute.KeyValue{
 		Key:   KEY_RESOURCE_ENV,
 		Value: attribute.StringValue(env),
 	})
 }
 
-func (m *Resources) InstanceId(id string) {
+func (m *Resources) SetInstanceId(id string) {
 	m.kvs = append(m.kvs, attribute.KeyValue{
 		Key:   KEY_RESOURCE_INSTANCE_ID,
 		Value: attribute.StringValue(id),
 	})
 }
 
-func (m *Resources) IP(ipAddr string) {
+func (m *Resources) SetIP(ipAddr string) {
 	m.kvs = append(m.kvs, attribute.KeyValue{
 		Key:   KEY_RESOURCE_INSTANCE_IP,
 		Value: attribute.StringValue(ipAddr),
 	})
 }
 
-func (m *Resources) ServiceName(name string) {
-	m.kvs = append(m.kvs, attribute.KeyValue{
-		Key:   KEY_RESOURCE_SERVICE_NAME,
-		Value: attribute.StringValue(name),
-	})
-}
-
-func (m *Resources) Namespace(namespace string) {
+func (m *Resources) SetNamespace(namespace string) {
 	m.kvs = append(m.kvs, attribute.KeyValue{
 		Key:   KEY_RESOURCE_NAMESPACE,
 		Value: attribute.StringValue(namespace),
 	})
 }
 
-func (m *Resources) TradeId(tradeId string) {
+func (m *Resources) SetServiceName(serviceName string) {
 	m.kvs = append(m.kvs, attribute.KeyValue{
-		Key:   KEY_UNI_TRACE_ID,
-		Value: attribute.StringValue(tradeId),
-	})
-}
-
-func (m *Resources) KindClient() {
-	m.kvs = append(m.kvs, attribute.KeyValue{
-		Key:   KEY_SPAN_KIND,
-		Value: attribute.StringValue("client"),
+		Key:   KEY_RESOURCE_SERVICE_NAME,
+		Value: attribute.StringValue(serviceName),
 	})
 }

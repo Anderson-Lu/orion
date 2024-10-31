@@ -1,9 +1,6 @@
 package client
 
 import (
-	"context"
-
-	"github.com/Anderson-Lu/orion/orpc/client/options"
 	"github.com/Anderson-Lu/orion/orpc/client/resolver"
 	"github.com/Anderson-Lu/orion/orpc/codes"
 	"github.com/Anderson-Lu/orion/orpc/tracing"
@@ -31,6 +28,10 @@ func (o *OrionClient) RegisterTracing(trace *tracing.Tracing) {
 	o.trace = trace
 }
 
+func (o *OrionClient) GetTracing() *tracing.Tracing {
+	return o.trace
+}
+
 func (o *OrionClient) RegisterCircuitBreakRule(ruleConfigs ...*circuit_break.RuleConfig) {
 	if o.breaker == nil {
 		return
@@ -40,60 +41,57 @@ func (o *OrionClient) RegisterCircuitBreakRule(ruleConfigs ...*circuit_break.Rul
 	}
 }
 
-func (o *OrionClient) Invoke(ctx context.Context, req, rsp interface{}, opts ...options.OrionClientInvokeOption) error {
+func (o *OrionClient) Do(request *OrionRequest) error {
 
-	meta := newOrionRequestMeta(ctx, req, rsp, opts...)
 	if o.trace != nil {
-		meta.ctx, meta.span = o.trace.SpanClient(ctx, meta.method)
-		meta.headers.Set(tracing.KEY_HEADER_TRACE_ID, meta.span.SpanContext().TraceID().String())
-		meta.headers.Set(tracing.KEY_HEADER_SPAN_ID, meta.span.SpanContext().SpanID().String())
+		request.ctx, request.span = o.trace.OutgoingSpan(request.ctx, "orion-grpc:"+request.method, request.metaCarrier())
 	}
 
-	if circuitKey := meta.getCircuitKey(); o.breaker != nil && circuitKey != "" {
+	if circuitKey := request.getCircuitKey(); o.breaker != nil && circuitKey != "" {
 		if canPass := o.breaker.Pass(circuitKey); !canPass {
-			meta.wrapError(codes.ErrClientCircuitBreaked)
-			return o.after(meta)
+			request.wrapError(codes.ErrClientCircuitBreaked)
+			return o.after(request)
 		}
 	}
 
 	var conn *grpc.ClientConn
 	var err error
-	if meta.directEnable {
-		drsv := resolver.NewDirectResolver(meta.direct)
-		conn, err = drsv.Select(meta.resolverKey, meta.balancerParams...)
+	if request.directEnable {
+		drsv := resolver.NewDirectResolver(request.direct)
+		conn, err = drsv.Select(request.resolverKey, request.balancerParams...)
 	} else {
-		conn, err = o.rsv.Select(meta.resolverKey, meta.balancerParams...)
+		conn, err = o.rsv.Select(request.resolverKey, request.balancerParams...)
 	}
 
 	if err != nil {
-		meta.wrapError(err)
-		return o.after(meta)
+		request.wrapError(err)
+		return o.after(request)
 	}
 
-	meta.wrapError(conn.Invoke(meta.buildContext(), meta.method, req, rsp, meta.callOptions...))
-	return o.after(meta)
+	request.wrapError(conn.Invoke(request.buildContext(), request.method, request.req, request.rsp, request.callOptions...))
+	return o.after(request)
 }
 
-func (o *OrionClient) after(meta *OrionRequestMeta) error {
-	reqCost := meta.cost()
-	if circuitKey := meta.getCircuitKey(); o.breaker != nil && circuitKey != "" && codes.GetCodeFromError(meta.err()) != codes.ErrCodeCircuitBreak {
-		o.breaker.Report(circuitKey, len(meta.errs) == 0, int64(reqCost))
+func (o *OrionClient) after(request *OrionRequest) error {
+	reqCost := request.cost()
+	if circuitKey := request.getCircuitKey(); o.breaker != nil && circuitKey != "" && codes.GetCodeFromError(request.err()) != codes.ErrCodeCircuitBreak {
+		o.breaker.Report(circuitKey, len(request.errs) == 0, int64(reqCost))
 	}
 
-	if meta.span != nil {
-		code, msg := codes.GetCodeAndMessageFromError(meta.err())
+	if request.span != nil {
+		code, msg := codes.GetCodeAndMessageFromError(request.err())
 		if code != 0 {
-			meta.span.SetStatus(oCodes.Error, msg)
+			request.span.SetStatus(oCodes.Error, msg)
 		}
-		meta.span.SetAttributes(attribute.KeyValue{
+		request.span.SetAttributes(attribute.KeyValue{
 			Key:   attribute.Key(tracing.KEY_SPAN_ERRCODE),
 			Value: attribute.IntValue(code),
 		}, attribute.KeyValue{
 			Key:   attribute.Key(tracing.KEY_UNI_TRACE_ID),
-			Value: attribute.StringValue(meta.span.SpanContext().TraceID().String()),
+			Value: attribute.StringValue(request.span.SpanContext().TraceID().String()),
 		})
-		meta.span.End()
+		request.span.End()
 	}
 
-	return meta.err()
+	return request.err()
 }

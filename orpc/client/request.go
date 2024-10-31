@@ -5,12 +5,13 @@ import (
 	"time"
 
 	"github.com/Anderson-Lu/orion/orpc/client/options"
+	"github.com/Anderson-Lu/orion/orpc/tracing"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
 
-type OrionRequestMeta struct {
+type OrionRequest struct {
 
 	// origonal params
 	ctx  context.Context
@@ -41,43 +42,53 @@ type OrionRequestMeta struct {
 	span trace.Span
 }
 
-func (c *OrionRequestMeta) err() error {
+func (c *OrionRequest) Span() trace.Span {
+	return c.span
+}
+
+func (c *OrionRequest) metaCarrier() tracing.MetadataCarrier {
+	return tracing.NewMetadataCarrier(c.headers)
+}
+
+func (c *OrionRequest) err() error {
 	if len(c.errs) == 0 {
 		return nil
 	}
 	return c.errs[len(c.errs)-1]
 }
 
-func (c *OrionRequestMeta) cost() int64 {
+func (c *OrionRequest) cost() int64 {
 	c.end = time.Now().UnixMilli()
 	return c.end - c.begin
 }
 
-func (c *OrionRequestMeta) getCircuitKey() string {
+func (c *OrionRequest) getCircuitKey() string {
 	if !c.circuitEnable || c.circuitKey == "" {
 		return ""
 	}
 	return c.circuitKey
 }
 
-func (c *OrionRequestMeta) wrapError(err error) {
+func (c *OrionRequest) wrapError(err error) {
 	if err == nil {
 		return
 	}
 	c.errs = append(c.errs, err)
 }
 
-func (c *OrionRequestMeta) buildContext() context.Context {
+func (c *OrionRequest) buildContext() context.Context {
 	if c.headers == nil {
 		return c.ctx
 	}
-
-	cc := metadata.NewOutgoingContext(c.ctx, c.headers)
-	return cc
+	return metadata.NewOutgoingContext(c.ctx, c.headers)
 }
 
-func newOrionRequestMeta(ctx context.Context, req, rsp interface{}, opts ...options.OrionClientInvokeOption) *OrionRequestMeta {
-	o := &OrionRequestMeta{
+func (c *OrionRequest) Context() context.Context {
+	return c.ctx
+}
+
+func NewOrionRequest(ctx context.Context, req, rsp interface{}, opts ...options.OrionClientInvokeOption) *OrionRequest {
+	o := &OrionRequest{
 		ctx:   ctx,
 		begin: time.Now().UnixMilli(),
 		opts:  opts,

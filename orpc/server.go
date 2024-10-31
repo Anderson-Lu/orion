@@ -14,6 +14,9 @@ import (
 
 	"github.com/Anderson-Lu/orion/orpc/build"
 	"github.com/Anderson-Lu/orion/orpc/interceptors"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+
 	"github.com/Anderson-Lu/orion/orpc/registry"
 	"github.com/Anderson-Lu/orion/orpc/registry/consul"
 	"github.com/Anderson-Lu/orion/orpc/tracing"
@@ -98,14 +101,16 @@ func (s *Server) initTracing() error {
 		return nil
 	}
 
-	bs := &tracing.Resources{}
-	bs.Env(s.c.Tracing.Env)
-	bs.Namespace(s.c.Tracing.Namespace)
-	bs.IP(utils.IP().GetLocalIP())
-	bs.ServiceName(s.c.Tracing.ServiceName)
-	bs.InstanceId(s.c.Tracing.InstanceId)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(tracing.OrionTracingPropagation{}))
 
-	tr, err := tracing.NewTracing(s.c.Tracing.ServiceName, tracing.WithOpenTelemetryAddress(s.c.Tracing.Address), tracing.WithResource(bs))
+	bs := &tracing.Resources{}
+	bs.SetEnv(s.c.Tracing.Env)
+	bs.SetNamespace(s.c.Tracing.Namespace)
+	bs.SetIP(utils.IP().GetLocalIP())
+	bs.SetInstanceId(s.c.Tracing.InstanceId)
+	bs.SetServiceName(s.c.Tracing.ServiceName)
+
+	tr, err := tracing.NewTracing(tracing.WithOpenTelemetryAddress(s.c.Tracing.Address), tracing.WithResource(bs))
 	if err != nil {
 		return err
 	}
