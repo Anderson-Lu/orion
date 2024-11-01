@@ -79,4 +79,11 @@ func main() {
 	span2.End()
 
 	time.Sleep(time.Millisecond * 1000)
+
+	for i := 0; i < 10; i++ {
+		cli.GetTracing().Metrics().Counter(context.Background(), "count1", int64(i+1), "demo counter")
+		cli.GetTracing().Metrics().Counter(context.Background(), "count2", int64(i+1), "demo counter")
+	}
+
+	select {}
 }

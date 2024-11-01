@@ -29,6 +29,7 @@ type Tracing struct {
 
 	metricExportor *otlpmetricgrpc.Exporter
 	metricProvider *metric.MeterProvider
+	metrics        *OrionMetrics
 
 	traceExportor *otlptrace.Exporter
 	traceProvider *trace.TracerProvider
@@ -51,6 +52,7 @@ func NewTracing(opts ...TracingOption) (*Tracing, error) {
 		return nil, err
 	}
 	p.initTracer()
+	p.initMetrics()
 	return p, nil
 }
 
@@ -91,6 +93,10 @@ func (p *Tracing) initProvider() error {
 	otel.SetTracerProvider(p.traceProvider)
 	otel.SetMeterProvider(p.metricProvider)
 	return nil
+}
+
+func (p *Tracing) initMetrics() {
+	p.metrics = NewOrionMetrics(p.name, p.metricProvider)
 }
 
 func (p *Tracing) initTracer() error {
@@ -139,4 +145,8 @@ func (p *Tracing) Span(ctx context.Context, spanName string, spanKind ot.SpanKin
 	}
 
 	return otel.Tracer(p.propagator.GetTracerName(ctx)).Start(ctx, spanName, ot.WithAttributes(kvs...), ot.WithSpanKind(spanKind))
+}
+
+func (p *Tracing) Metrics() *OrionMetrics {
+	return p.metrics
 }
