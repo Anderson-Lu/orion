@@ -12,6 +12,7 @@ import (
 	"github.com/Anderson-Lu/orion/orpc/tracing"
 	"github.com/Anderson-Lu/orion/pkg/circuit_break"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -33,6 +34,7 @@ func main() {
 		HaflOpenPassRate: 0,
 		RuleExpression:   "req_count > 100",
 	})
+	cli.SetDailOptions(grpc.WithDefaultServiceConfig(`{"methodConfig":[{"name":"/todo.UitTodo/Add"}],"retryPolicy":{"MaxAttempts":"1","InitialBackoff":".01s","MaxBackoff":".01s","BackoffMultiplier":1.0},"RetryableStatusCodes":["UNAVAILABLE"]}`))
 
 	bs := &tracing.Resources{}
 	bs.SetEnv("test")

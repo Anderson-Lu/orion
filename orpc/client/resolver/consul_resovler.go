@@ -12,11 +12,12 @@ import (
 )
 
 type ConsulResovler struct {
-	address  string
-	conns    map[string]*ConsulResovlerConns
-	mu       sync.RWMutex
-	watchers *consul.OrionConsulWatchers
-	b        balancer.Balancer
+	address     string
+	conns       map[string]*ConsulResovlerConns
+	mu          sync.RWMutex
+	watchers    *consul.OrionConsulWatchers
+	b           balancer.Balancer
+	dialOptions []grpc.DialOption
 }
 
 type ConsulResovlerOption func(*ConsulResovler)
@@ -39,6 +40,10 @@ func NewConsulResovler(address string, opts ...ConsulResovlerOption) *ConsulReso
 		c.b = balancer.NewDefaultBalancer()
 	}
 	return c
+}
+
+func (c *ConsulResovler) SetDialOptions(opts ...grpc.DialOption) {
+	c.dialOptions = opts
 }
 
 func (c *ConsulResovler) notify(serviceName string, nodes []consul.OrionNode) {
@@ -86,11 +91,10 @@ type ConsulResovlerConns struct {
 	conns []*ConsulResovlerConn
 	mu    sync.RWMutex
 	b     balancer.Balancer
+	opts  []grpc.DialOption
 }
 
 func (c *ConsulResovlerConns) update(incomingAddrs []string) {
-
-	fmt.Println("incomingAddrs", incomingAddrs)
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -114,7 +118,7 @@ func (c *ConsulResovlerConns) update(incomingAddrs []string) {
 	for _, v := range incomingAddrs {
 		idx, ok := master[v]
 		if !ok {
-			c, err := newConsulResovlerConn(v)
+			c, err := newConsulResovlerConn(v, c.opts)
 			if err == nil {
 				newConns = append(newConns, c)
 			}
@@ -146,9 +150,10 @@ type ConsulResovlerConn struct {
 	addr string
 }
 
-func newConsulResovlerConn(addr string) (*ConsulResovlerConn, error) {
+func newConsulResovlerConn(addr string, dailOptions []grpc.DialOption) (*ConsulResovlerConn, error) {
 	opts := []grpc.DialOption{}
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	opts = append(opts, dailOptions...)
 	c, err := grpc.NewClient(addr, opts...)
 	if err != nil {
 		return nil, err

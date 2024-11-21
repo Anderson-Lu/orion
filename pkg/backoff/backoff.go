@@ -7,6 +7,7 @@ import (
 
 type IBackOff interface {
 	Next() (bool, int64)
+	Reset()
 }
 
 var (
@@ -40,6 +41,18 @@ func (e *ExponentialBackOff) Next() (bool, int64) {
 	return true, 1 << (e.cur - 1)
 }
 
+func (e *ExponentialBackOff) Reset() {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.cur = 1
+}
+
+func NewExponentialBackOff(max int64) *LinearBackoff {
+	return &LinearBackoff{
+		max: max,
+	}
+}
+
 func NewLinearBackoff(gap int64) *LinearBackoff {
 	return &LinearBackoff{c: gap}
 }
@@ -56,4 +69,8 @@ func (e *LinearBackoff) Next() (bool, int64) {
 		return false, 0
 	}
 	return true, e.c
+}
+
+func (e *LinearBackoff) Reset() {
+	atomic.StoreInt64(&e.cur, 0)
 }

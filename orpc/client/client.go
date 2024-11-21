@@ -14,14 +14,18 @@ func New(rsv resolver.IResolver) (*OrionClient, error) {
 	cli := &OrionClient{}
 	cli.breaker = circuit_break.NewCircuitBreaker()
 	cli.rsv = rsv
-
 	return cli, nil
 }
 
 type OrionClient struct {
-	rsv     resolver.IResolver
-	breaker *circuit_break.CircuitBreaker
-	trace   *tracing.Tracing
+	rsv         resolver.IResolver
+	breaker     *circuit_break.CircuitBreaker
+	trace       *tracing.Tracing
+	dailOptions []grpc.DialOption
+}
+
+func (o *OrionClient) SetDailOptions(opts ...grpc.DialOption) {
+	o.dailOptions = opts
 }
 
 func (o *OrionClient) RegisterTracing(trace *tracing.Tracing) {
@@ -58,8 +62,10 @@ func (o *OrionClient) Do(request *OrionRequest) error {
 	var err error
 	if request.directEnable {
 		drsv := resolver.NewDirectResolver(request.direct)
+		drsv.SetDialOptions(o.dailOptions...)
 		conn, err = drsv.Select(request.resolverKey, request.balancerParams...)
 	} else {
+		o.rsv.SetDialOptions(o.dailOptions...)
 		conn, err = o.rsv.Select(request.resolverKey, request.balancerParams...)
 	}
 
